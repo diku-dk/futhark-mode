@@ -1,0 +1,18 @@
+language: minimal
+
+sudo: false
+
+dist: trusty
+
+git:
+  submodules: false
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:adrozdoff/emacs'
+    packages:
+    - emacs25
+
+script:
+ - ./futhark-mode.el-corpus-test.sh
