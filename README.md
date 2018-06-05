@@ -1,6 +1,6 @@
 # futhark-mode for Emacs
 
-[![MELPA](https://melpa.org/packages/futhark-mode-badge.svg)](https://melpa.org/#/futhark-mode)
+[![MELPA](https://melpa.org/packages/futhark-mode-badge.svg)](https://melpa.org/#/futhark-mode)[![Build Status](https://travis-ci.org/diku-dk/futhark-mode.svg?branch=master)](https://travis-ci.org/diku-dk/futhark-mode)
 
 See the file `futhark-mode.el`.  This Emacs mode provides both syntax
 highlighting and automatic indentation.
