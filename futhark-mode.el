@@ -10,7 +10,7 @@
 ;; This file is not part of GNU Emacs.
 
 ;;; License:
-;; ICS <https://github.com/diku-dk/futhark/blob/master/LICENSE>
+;; ICS <https://github.com/diku-dk/futhark-mode/blob/master/LICENSE>
 
 ;;; Commentary:
 ;; Futhark is a small programming language designed to be compiled to
