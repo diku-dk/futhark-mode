@@ -23,7 +23,7 @@ properly, please fix it, and put a small example in the
 the future.
 
 
-### Authors
+## Authors
 
 Initiated by Troels Henriksen in 2013.  Subsequently improved by:
 
