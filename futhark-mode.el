@@ -532,8 +532,8 @@ See URL `https://github.com/diku-dk/futhark'."
   (setq-local indent-region-function nil)
   (setq-local comment-start "--")
   (setq-local comment-start-skip "--[ \t]*")
-  (setq-local paragraph-start (concat " *-- |\\| ==$\\|" page-delimiter))
-  (setq-local paragraph-separate (concat " *-- ==$\\|" page-delimiter))
+  (setq-local paragraph-start (concat " *-- |\\| ==$\\|[ \t]*$\\|" page-delimiter))
+  (setq-local paragraph-separate (concat " *-- ==$\\|[ \t]*$\\|" page-delimiter))
   (setq-local comment-padding " "))
 
 (provide 'futhark-mode)
