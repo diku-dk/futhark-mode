@@ -246,6 +246,7 @@ In general, prefer as little indentation as possible."
                 (futhark-looking-at-word "type")
                 (futhark-looking-at-word "val")
                 (futhark-looking-at-word "module")
+                (futhark-looking-at-word "local")
                 (futhark-looking-at-word "include")
                 (futhark-looking-at-word "import"))
             (or
@@ -254,11 +255,13 @@ In general, prefer as little indentation as possible."
                 (ignore-errors (backward-up-list 1) t)
                 (looking-at "{")
                 (or
+                 (futhark-keyword-backward "local")
                  (futhark-keyword-backward "module")
                  (futhark-keyword-backward "open")
                  (and
                   (ignore-errors (backward-up-list 1) t)
                   (or
+                   (futhark-keyword-backward "local")
                    (futhark-keyword-backward "module")
                    (futhark-keyword-backward "open"))))
                 (+ futhark-indent-level (current-column))))
