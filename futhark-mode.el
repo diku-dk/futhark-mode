@@ -546,20 +546,9 @@ Do not put command-line options here; they go in `futhark-interpreter-args'."
 (defun run-futhark ()
   "Run an inferior instance of `futharki' inside Emacs."
   (interactive)
-  (let* ((futharki-program futhark-interpreter-name)
-         (buffer (comint-check-proc "futharki")))
-    ;; pop to the "*futharki*" buffer if the process is dead, the
-    ;; buffer is missing or it's got the wrong mode.
-    (pop-to-buffer-same-window
-     (if (or buffer (not (derived-mode-p 'inferior-futhark-mode))
-             (comint-check-proc (current-buffer)))
-         (get-buffer-create (or buffer "*futharki*"))
-       (current-buffer)))
-    ;; create the comint process if there is no buffer.
-    (unless buffer
-      (apply 'make-comint-in-buffer "futharki" buffer
-             futharki-program futhark-interpreter-args)
-      (inferior-futhark-mode))))
+  (pop-to-buffer
+   (apply 'make-comint "futharki" futhark-interpreter-name futhark-interpreter-args))
+  (inferior-futhark-mode))
 
 (defvar inferior-futhark-mode-map
   (let ((map (make-sparse-keymap)))
@@ -589,7 +578,7 @@ if a running futharki instance cannot be found."
              (read-file-name "File to load: " nil nil t))))
   (comint-check-source file)
   (let ((b (get-buffer "*futharki*"))
-        (p (get-process "futharki")))
+        (p (comint-check-proc b)))
     (if (and b p)
         (progn
          (with-current-buffer b
