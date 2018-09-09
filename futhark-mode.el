@@ -34,7 +34,9 @@
   "Hook for `futhark-mode'.  Is run whenever the mode is entered.")
 
 (defvar futhark-mode-map
-  (make-keymap)
+  (let ((map (make-keymap)))
+    (define-key map "\C-c\C-l" 'futhark-load-file)
+    map)
   "Keymap for `futhark-mode'.")
 
 
@@ -523,6 +525,72 @@ See URL `https://github.com/diku-dk/futhark'."
               (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
               line-end)))
   (add-to-list 'flycheck-checkers 'futhark))
+
+;;; Interactive Futhark mode
+
+(require 'comint)
+
+(defcustom futhark-interpreter-name "futharki"
+  "Futhark interpreter to run.
+
+Do not put command-line options here; they go in `futhark-interpreter-args'."
+  :type 'string)
+
+(defcustom futhark-interpreter-args '()
+  "Default command line options to pass to `futhark-interpreter-name', if any."
+  :type '(repeat string))
+
+(defvar futhark-prompt-regexp "^\\(?:\\[[0-9]+\\]\\)"
+  "Prompt for `run-futhark'.")
+
+(defun run-futhark ()
+  "Run an inferior instance of `futharki' inside Emacs."
+  (interactive)
+  (let* ((futharki-program futhark-interpreter-name)
+         (buffer (comint-check-proc "futharki")))
+    ;; pop to the "*futharki*" buffer if the process is dead, the
+    ;; buffer is missing or it's got the wrong mode.
+    (pop-to-buffer-same-window
+     (if (or buffer (not (derived-mode-p 'inferior-futhark-mode))
+             (comint-check-proc (current-buffer)))
+         (get-buffer-create (or buffer "*futharki*"))
+       (current-buffer)))
+    ;; create the comint process if there is no buffer.
+    (unless buffer
+      (apply 'make-comint-in-buffer "futharki" buffer
+             futharki-program futhark-interpreter-args)
+      (inferior-futhark-mode))))
+
+(defvar inferior-futhark-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map comint-mode-map)
+    map)
+  "Keymap for `inferior-futhark-mode'.")
+
+(define-derived-mode inferior-futhark-mode comint-mode "futharki"
+  "Major mode for `run-futhark'.
+
+\\<inferior-futhark-mode-map>"
+  nil "futhark"
+  (setq comint-prompt-regexp futhark-prompt-regexp)
+  ;; this makes it read only; a contentious subject as some prefer the
+  ;; buffer to be overwritable.
+  (setq comint-prompt-read-only t)
+  (set (make-local-variable 'paragraph-start) futhark-prompt-regexp))
+
+(defun futhark-load-file (file)
+  "Load FILE into the futharki process.
+FILE is the file visited by the current buffer."
+  (interactive
+   (list (or buffer-file-name
+             (read-file-name "File to load: " nil nil t))))
+  (comint-check-source file)
+  (let ((b (get-buffer "*futharki*"))
+        (p (get-process "futharki")))
+    (when (and b p)
+      (with-current-buffer b
+        (apply comint-input-sender (list p (concat ":load " file))))
+      (pop-to-buffer b))))
 
 ;;; Actual mode declaration
 
