@@ -86,6 +86,7 @@
                     "\\|"
                     "[0-9]+"
                     "\\(?:\\.[0-9]+\\)?"
+                    "\\(?:e-?[0-9]+\\)?"
                     "\\)"
                     )
             "\\(?:i8\\|i16\\|i32\\|i64\\|u8\\|u16\\|u32\\|u64\\|f32\\|f64\\)?"
@@ -161,6 +162,14 @@
       (,(regexp-opt futhark-keywords 'words)
        . font-lock-keyword-face)
 
+      ;; Constants.
+      ;;; Booleans.
+      (,(regexp-opt futhark-booleans 'words)
+       . font-lock-constant-face)
+
+      (,(concat "\\(" futhark-number "\\)")
+       . font-lock-constant-face)
+
       ;; Types.
       ;;; Type aliases.  FIXME: It would be nice to highlight also the right
       ;;; hand side.
@@ -181,15 +190,6 @@
       ;;; Operators.
       (,futhark-operator
        . font-lock-builtin-face)
-
-      ;; Constants.
-      ;;; Booleans.
-      (,(regexp-opt futhark-booleans 'words)
-       . font-lock-constant-face)
-
-      (,(concat "\\(" futhark-number "\\)")
-       . font-lock-constant-face)
-
       )
     "Highlighting expressions for Futhark.")
   )
