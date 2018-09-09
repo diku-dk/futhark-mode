@@ -580,17 +580,23 @@ Do not put command-line options here; they go in `futhark-interpreter-args'."
 
 (defun futhark-load-file (file)
   "Load FILE into the futharki process.
-FILE is the file visited by the current buffer."
+FILE is the file visited by the current buffer.
+
+Automatically starts an inferior futharki mode with `run-futhark`
+if a running futharki instance cannot be found."
   (interactive
    (list (or buffer-file-name
              (read-file-name "File to load: " nil nil t))))
   (comint-check-source file)
   (let ((b (get-buffer "*futharki*"))
         (p (get-process "futharki")))
-    (when (and b p)
-      (with-current-buffer b
-        (apply comint-input-sender (list p (concat ":load " file))))
-      (pop-to-buffer b))))
+    (if (and b p)
+        (progn
+         (with-current-buffer b
+           (apply comint-input-sender (list p (concat ":load " file))))
+         (pop-to-buffer b))
+      (run-futhark)
+      (futhark-load-file file))))
 
 ;;; Actual mode declaration
 
