@@ -582,7 +582,7 @@ Do not put command-line options here; they go in `futhark-interpreter-args'."
   "Load FILE into the futharki process.
 FILE is the file visited by the current buffer.
 
-Automatically starts an inferior futharki mode with `run-futhark`
+Automatically starts an inferior futharki process with `run-futhark`
 if a running futharki instance cannot be found."
   (interactive
    (list (or buffer-file-name
