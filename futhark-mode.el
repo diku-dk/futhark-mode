@@ -578,7 +578,7 @@ if a running futharki instance cannot be found."
              (read-file-name "File to load: " nil nil t))))
   (comint-check-source file)
   (let ((b (get-buffer "*futharki*"))
-        (p (comint-check-proc b)))
+        (p (get-process "futharki")))
     (if (and b p)
         (progn
          (with-current-buffer b
