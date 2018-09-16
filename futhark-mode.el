@@ -58,7 +58,8 @@
   (defconst futhark-builtin-functions
     '("zip" "unzip" "map" "reduce"
       "reduce_comm" "scan" "filter" "partition" "scatter" "stream_map"
-      "stream_map_per" "stream_red" "stream_map_per" "stream_seq")
+      "stream_map_per" "stream_red" "stream_map_per" "stream_seq"
+      "reduce_by_index")
     "All Futhark builtin SOACs, functions, and non-symbolic operators.")
 
   (defconst futhark-numeric-types
