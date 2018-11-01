@@ -504,7 +504,7 @@ Set mark and return t if found; return nil otherwise."
                                     (backward-up-list 1)
                                     (point)))
                   (max
-                   (or (save-excursion (futhark-keyword-backward-raw "fun"))
+                   (or (save-excursion (futhark-keyword-backward-raw "let"))
                        0)
                    (or (save-excursion (futhark-keyword-backward-raw "entry"))
                        0))))
