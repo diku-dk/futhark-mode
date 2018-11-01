@@ -616,7 +616,7 @@ if a running futharki instance cannot be found."
 ;;; Actual mode declaration
 
 ;;;###autoload
-(define-derived-mode futhark-mode fundamental-mode "Futhark"
+(define-derived-mode futhark-mode prog-mode "Futhark"
   "Major mode for editing Futhark source files."
   :syntax-table futhark-mode-syntax-table
   (setq-local font-lock-defaults '(futhark-font-lock))
