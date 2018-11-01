@@ -215,7 +215,6 @@
     ;; of the word class.
     (modify-syntax-entry ?' "w" st)
     (modify-syntax-entry ?_ "w" st)
-    (modify-syntax-entry ?\\ "_" st)
     st)
   "Syntax table used in `futhark-mode'.")
 
