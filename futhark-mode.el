@@ -206,8 +206,6 @@
 
 (defvar futhark-mode-syntax-table
   (let ((st (make-syntax-table)))
-    ;; Define the -- line comment syntax.
-    (modify-syntax-entry ?- "_ 123" st)
     (modify-syntax-entry ?\n ">" st)
     ;; Make apostrophe and underscore be part of variable names.
     ;; Technically, they should probably be part of the symbol class,
@@ -215,6 +213,22 @@
     ;; of the word class.
     (modify-syntax-entry ?' "w" st)
     (modify-syntax-entry ?_ "w" st)
+    (modify-syntax-entry ?\( "()" st)
+    (modify-syntax-entry ?\) ")(" st)
+    (modify-syntax-entry ?\[  "(]" st)
+    (modify-syntax-entry ?\]  ")[" st)
+    (modify-syntax-entry ?\{  "(}" st)
+    (modify-syntax-entry ?\}  "){" st)
+
+    ;; Symbol characters are treated as punctuation because they are
+    ;; not able to form identifiers with word constituent 'w' class.
+    ;; The '-' symbol is handled specially because it is also used for
+    ;; line comments.
+    (mapc (lambda (x)
+            (modify-syntax-entry x "_" st))
+          "+*/%=!><|&^.\\")
+    ;; Define the -- line comment syntax.
+    (modify-syntax-entry ?- "_ 123" st)
     st)
   "Syntax table used in `futhark-mode'.")
 
@@ -318,7 +332,7 @@ In general, prefer as little indentation as possible."
                       (save-excursion
                         (futhark-keyword-backward "case"))
                       (save-excursion
-                        (futhark-keyword-backward "\\\\")))))
+                        (futhark-symbol-backward "\\\\")))))
                 (and (not (eq nil m))
                      (goto-char m)
                      (+ (current-column) futhark-indent-level)))))
@@ -493,9 +507,7 @@ The net effect seems to be that it works ok."
                 (ignore-errors
                   (re-search-backward "^[[:space:]]*$" bound))))))
 
-(defun futhark-keyword-backward (word)
-  "Go to a keyword WORD before the current position.
-Set mark and return t if found; return nil otherwise."
+(defun futhark-something-backward (check)
   ;; FIXME: Support nested let-chains.  This used to work, but was removed
   ;; because the code was too messy.
   (let (;; Only look in the current paren-delimited code if present.
@@ -514,13 +526,23 @@ Set mark and return t if found; return nil otherwise."
                 (futhark-backward-part)
                 (>= (point) topp))
 
-      (if (futhark-looking-at-word word)
+      (if (funcall check)
           (setq result (point))))
 
     (or result
         (progn
           (goto-char startp)
           nil))))
+
+(defun futhark-keyword-backward (word)
+  "Go to a keyword WORD before the current position.
+Set mark and return t if found; return nil otherwise."
+  (futhark-something-backward (lambda () (futhark-looking-at-word word))))
+
+(defun futhark-symbol-backward (symbol)
+  "Go to a symbol SYMBOL before the current position.
+Set mark and return t if found; return nil otherwise."
+  (futhark-something-backward (lambda () (looking-at symbol))))
 
 (defun futhark-keyword-backward-raw (word)
   "Go to a keyword WORD before the current position.
