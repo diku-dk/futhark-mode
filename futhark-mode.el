@@ -51,7 +51,7 @@
   ;; Emacs Lisp is stupid.
   (defconst futhark-keywords
     '("if" "then" "else" "let" "loop" "in" "with" "type"
-      "val" "entry" "for" "while" "do"
+      "val" "entry" "for" "while" "do" "case" "match"
       "unsafe" "include" "import" "module" "open" "local" "assert")
     "All Futhark keywords.")
 
@@ -97,6 +97,10 @@
   (defconst futhark-var
     (concat "\\(?:" "[_'[:alnum:]]+" "\\)")
     "A regex describing a Futhark variable.")
+
+  (defconst futhark-constructor
+    (concat "\\(?:" "#[_'[:alnum:]]+" "\\)")
+    "A regex describing a Futhark constructor.")
 
   (defconst futhark-operator
     (concat "["
@@ -168,7 +172,12 @@
       (,(regexp-opt futhark-booleans 'words)
        . font-lock-constant-face)
 
+      ;;; Numbers
       (,(concat "\\(" futhark-number "\\)")
+       . font-lock-constant-face)
+
+      ;;; Constructors
+      (,(concat "\\(" futhark-constructor "\\)")
        . font-lock-constant-face)
 
       ;; Types.
@@ -198,7 +207,7 @@
 (defvar futhark-mode-syntax-table
   (let ((st (make-syntax-table)))
     ;; Define the -- line comment syntax.
-    (modify-syntax-entry ?- ". 123" st)
+    (modify-syntax-entry ?- "_ 123" st)
     (modify-syntax-entry ?\n ">" st)
     ;; Make apostrophe and underscore be part of variable names.
     ;; Technically, they should probably be part of the symbol class,
@@ -296,17 +305,21 @@ In general, prefer as little indentation as possible."
                   (futhark-keyword-backward "module")
                   (current-column))))))
 
-       ;; If the previous code line ends with "=", align to the matching "let"
-       ;; or "loop" column plus one indent level.
+       ;; If the previous code line ends with "=" or "->", align to the matching "let",
+       ;; "loop", "case", or "\" column plus one indent level.
        (save-excursion
          (and (futhark-backward-part)
-              (looking-at "=[[:space:]]*$")
+              (looking-at "\\(?:=\\|->\\)[[:space:]]*$")
               (let ((m
                      (futhark-max
                       (save-excursion
                         (futhark-keyword-backward "let"))
                       (save-excursion
-                        (futhark-keyword-backward "loop")))))
+                        (futhark-keyword-backward "loop"))
+                      (save-excursion
+                        (futhark-keyword-backward "case"))
+                      (save-excursion
+                        (futhark-keyword-backward "\\\\")))))
                 (and (not (eq nil m))
                      (goto-char m)
                      (+ (current-column) futhark-indent-level)))))
@@ -350,6 +363,21 @@ In general, prefer as little indentation as possible."
                 (and (not (eq nil m))
                      (goto-char m)
                      (current-column)))))
+
+       ;; Align "case" to nearest "match" or "case".  Note that
+       ;; indenting "match" itself is handled by the usual rules;
+       ;; there is nothing special about it.
+       (save-excursion
+         (and (futhark-looking-at-word "case")
+              (futhark-keyword-backward "case\\|match")
+              (or
+               (let ((curline (line-number-at-pos)))
+                 (save-excursion
+                   (and (futhark-backward-part)
+                        (= (line-number-at-pos) curline)
+                        (futhark-looking-at-word "case\\|match")
+                        (current-column))))
+               (current-column))))
 
        ;; Align "then" to nearest "else if" or "if".
        (save-excursion
@@ -400,21 +428,19 @@ In general, prefer as little indentation as possible."
        ;; Otherwise, keep the user-specified indentation level.
        ))))
 
-(defun futhark-min (a b)
-  "Like `min', but also accepts nil values in A and B."
-  (or (and (eq nil a) b)
-      (and (eq nil b) a)
-      (and (not (eq nil a))
-           (not (eq nil b))
-           (min a b))))
+(defun futhark-min (&rest args)
+  "Like `min', but also accepts nil values."
+  (let ((args-nonnil (cl-remove-if-not 'identity args)))
+    (if args-nonnil
+        (apply 'min args-nonnil)
+      nil)))
 
-(defun futhark-max (a b)
-  "Like `max', but also accepts nil values in A and B."
-  (or (and (eq nil a) b)
-      (and (eq nil b) a)
-      (and (not (eq nil a))
-           (not (eq nil b))
-           (max a b))))
+(defun futhark-max (&rest args)
+  "Like `max', but also accepts nil values."
+  (let ((args-nonnil (cl-remove-if-not 'identity args)))
+    (if args-nonnil
+        (apply 'max args-nonnil)
+      nil)))
 
 (defun futhark-beginning-of-line-text ()
   "Move to the beginning of the non-whitespace text on this line."
