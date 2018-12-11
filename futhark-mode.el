@@ -103,9 +103,13 @@
     "A regex describing a Futhark constructor.")
 
   (defconst futhark-operator
-    (concat "["
-            "-+*/%!<>=&|@"
-            "]" "+"))
+    (concat "\\(?:"
+            (concat "["
+                    "-+*/%!<>=&|@"
+                    "]" "+")
+            "\\|"
+            "`[^`]*`"
+            "\\)"))
 
   (defconst futhark-non-tuple-type
     (concat "\\(?:"
