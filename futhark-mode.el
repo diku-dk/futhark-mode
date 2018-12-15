@@ -94,6 +94,9 @@
             "\\)\\>")
     "All numeric constants, including hex float literals.")
 
+  (defconst futhark-character
+    (concat "'[^']?'"))
+
   (defconst futhark-var
     (concat "\\(?:" "[_'[:alnum:]]+" "\\)")
     "A regex describing a Futhark variable.")
@@ -178,6 +181,10 @@
 
       ;;; Numbers
       (,(concat "\\(" futhark-number "\\)")
+       . font-lock-constant-face)
+
+      ;;; Characters
+      (,(concat "\\(" futhark-character "\\)")
        . font-lock-constant-face)
 
       ;;; Constructors
