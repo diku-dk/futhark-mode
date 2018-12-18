@@ -170,10 +170,6 @@
       (,(concat "\\(" futhark-var "\\)" ws ":")
        . '(1 font-lock-variable-name-face))
 
-      ;; Keywords.
-      (,(regexp-opt futhark-keywords 'words)
-       . font-lock-keyword-face)
-
       ;; Constants.
       ;;; Booleans.
       (,(regexp-opt futhark-booleans 'words)
@@ -190,6 +186,12 @@
       ;;; Constructors
       (,(concat "\\(" futhark-constructor "\\)")
        . font-lock-constant-face)
+
+      ;; Keywords.
+      ;; Placed after constants, so e.g. '#open' is highlighted
+      ;; as a value and not as a keyword.
+      (,(regexp-opt futhark-keywords 'words)
+       . font-lock-keyword-face)
 
       ;; Types.
       ;;; Type aliases.  FIXME: It would be nice to highlight also the right
