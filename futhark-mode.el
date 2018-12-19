@@ -626,7 +626,7 @@ expression, if any."
    (and (futhark-something-backward
          (lambda () (or (futhark-looking-at-word "do\\|in")
                         (save-excursion (and (futhark-forward-part)
-                                             (looking-at ",")))
+                                             (looking-at "[[:space:]]*\\(?:,\\|->\\)")))
                         (looking-at "=\\|->\\|,"))))
         ;; Go to just after the separator.
         (futhark-forward-part)
