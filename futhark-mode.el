@@ -233,6 +233,8 @@
     (modify-syntax-entry ?\{  "(}" st)
     (modify-syntax-entry ?\}  "){" st)
 
+    (modify-syntax-entry ?# "'" st)
+
     ;; Symbol characters are treated as punctuation because they are
     ;; not able to form identifiers with word constituent 'w' class.
     ;; The '-' symbol is handled specially because it is also used for
@@ -335,6 +337,17 @@ In general, prefer as little indentation as possible."
                  (and
                   (futhark-keyword-backward "module")
                   (current-column))))))
+
+       ;; Align additional constructors in a type abbreviation to the
+       ;; '=' sign.
+       (save-excursion
+         (and (save-excursion
+                (looking-at "|")
+                (futhark-keyword-backward "let\\|type")
+                (looking-at "type"))
+              (save-excursion
+               (futhark-symbol-backward "=")
+               (current-column))))
 
        ;; If the previous code line ends with "=" or "->", align to the matching "let",
        ;; "loop", "case", or "\" column plus one indent level.
