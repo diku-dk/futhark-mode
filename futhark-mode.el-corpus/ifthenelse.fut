@@ -28,3 +28,8 @@ let foo () =
     if a then b else
     let x = 2 in x
   in x
+
+let foo () =
+  if x then y else
+  if x then y else
+  x

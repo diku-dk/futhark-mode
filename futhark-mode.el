@@ -444,13 +444,22 @@ In general, prefer as little indentation as possible."
               (futhark-find-principal-if)
               (current-column)))
 
+       ;; An 'if' following an 'else' gets aligned to the corresponding preceding 'if'.
+       (save-excursion
+         (and (futhark-looking-at-word "if")
+              (futhark-backward-part)
+              (futhark-looking-at-word "else")
+              (futhark-find-principal-if)
+              (current-column)))
+
        ;; Align a function argument to the column of the first
        ;; argument to the function.
        (save-excursion
          (let ((m (point))
                (f (and (not (futhark-is-looking-at-keyword))
                        (not (looking-at "[]})]"))
-                       (futhark-find-function))))
+                       (futhark-find-function)
+                       (not (futhark-is-looking-at-keyword)))))
            (when (and f (/= (point) m))
              (or (save-excursion
                   (and (futhark-forward-part)
@@ -460,6 +469,13 @@ In general, prefer as little indentation as possible."
                        (current-column)))
                  (current-column)))))
 
+       ;; Align something following 'else' to the corresponding 'if'.
+       (save-excursion
+         (and (futhark-backward-part)
+              (futhark-looking-at-word "else")
+              (futhark-find-principal-if)
+              (current-column)))
+
        ;; Align general content inside parentheses to the first general
        ;; non-space content.
        (save-excursion
@@ -468,6 +484,7 @@ In general, prefer as little indentation as possible."
               (futhark-goto-first-text)
               (and
                (not (futhark-is-looking-at-keyword))
+               (not (looking-at "\\\\")) ; is not a lambda.
                (current-column))))
 
        ;; Otherwise, keep the user-specified indentation level.
@@ -598,8 +615,9 @@ expression, if any."
   (or
    (and (futhark-something-backward
          (lambda () (or (futhark-looking-at-word "do\\|in")
-                        (save-excursion (and (futhark-forward-part)
-                                             (looking-at "[[:space:]]*\\(?:,\\|->\\)")))
+                        (save-excursion
+                          (and (futhark-forward-part)
+                               (looking-at (concat "[[:space:]]*\\(?:,\\|->\\|" futhark-operator "\\)"))))
                         (looking-at "=\\|->\\|,"))))
         ;; Go to just after the separator.
         (futhark-forward-part)

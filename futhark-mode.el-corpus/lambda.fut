@@ -8,3 +8,7 @@ let g = map (\x ->
 
 let h = map (\(x) ->
                x)
+
+let f = map (\x ->
+               x ||
+               f)
