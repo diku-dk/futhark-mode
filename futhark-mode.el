@@ -240,6 +240,11 @@
     (mapc (lambda (x)
             (modify-syntax-entry x "_" st))
           "+*/%=!><|&^.\\")
+
+    (mapc (lambda (x)
+            (modify-syntax-entry x "." st))
+          ",:")
+
     ;; Define the -- line comment syntax.
     (modify-syntax-entry ?- "_ 123" st)
     st)
