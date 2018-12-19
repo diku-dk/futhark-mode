@@ -289,13 +289,21 @@ In general, prefer as little indentation as possible."
 
        ;; Align global definitions and headers to nearest module definition or
        ;; column 0.
+       ;;
+       ;; Detecting whether a 'let' is top-level or local is really
+       ;; hard.  We embed the heuristic that if the previous line is
+       ;; blank, then it is top-level.
        (and (or (futhark-looking-at-word "entry")
                 (futhark-looking-at-word "type")
                 (futhark-looking-at-word "val")
                 (futhark-looking-at-word "module")
                 (futhark-looking-at-word "local")
                 (futhark-looking-at-word "include")
-                (futhark-looking-at-word "import"))
+                (futhark-looking-at-word "import")
+                (and (futhark-looking-at-word "let")
+                     (save-excursion
+                       (forward-line -1)
+                       (futhark-is-empty-line))))
             (or
              (save-excursion
                (and
@@ -370,16 +378,6 @@ In general, prefer as little indentation as possible."
                 (and (not (eq nil m))
                      (goto-char m)
                      (+ (current-column) futhark-indent-level)))))
-
-       ;; Don't align "let" if the previous line is blank (be conservative!).
-       (save-excursion
-         (and (futhark-looking-at-word "let")
-              (let ((cur (current-column)))
-                (save-excursion
-                  (forward-line -1)
-                  (and
-                   (futhark-is-empty-line)
-                   cur)))))
 
        ;; Align "in", "let", or "loop" to the closest previous "let" or "loop".
        (save-excursion
