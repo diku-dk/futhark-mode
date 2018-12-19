@@ -368,9 +368,14 @@ In general, prefer as little indentation as possible."
               (let ((m
                      (futhark-max
                       (save-excursion
-                        (futhark-keyword-backward "let"))
+                        ;; Careful that we are not confused by a nested 'let'.
+                        (let ((m2 (futhark-keyword-backward "let\\|in")))
+                          (when (looking-at "let")
+                            m2)))
                       (save-excursion
-                        (futhark-keyword-backward "loop")))))
+                        (futhark-backward-part)
+                        (when (looking-at "do")
+                          (futhark-keyword-backward "loop"))))))
                 (and (not (eq nil m))
                      (goto-char m)
                      (current-column)))))
