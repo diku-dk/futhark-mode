@@ -390,8 +390,11 @@ In general, prefer as little indentation as possible."
                      (futhark-max
                       (save-excursion
                         (futhark-backward-part)
-                        (when (looking-at "unsafe")
-                          (point)))
+                        (cond ((looking-at "unsafe")
+                               (point))
+                              ((and (looking-at "else")
+                                    (futhark-find-principal-if))
+                               (point))))
                       (save-excursion
                         ;; Careful that we are not confused by a nested 'let'.
                         (let ((m2 (futhark-keyword-backward "let\\|in")))
