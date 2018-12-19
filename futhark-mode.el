@@ -435,41 +435,11 @@ In general, prefer as little indentation as possible."
                         (current-column))))
                (current-column))))
 
-       ;; Align "then" to nearest "else if" or "if".
+       ;; Align "else/then" to nearest "then" or "else if" or "if".
        (save-excursion
-         (and (futhark-looking-at-word "then")
-              (futhark-keyword-backward "if")
-              (or
-               (let ((curline (line-number-at-pos)))
-                 (save-excursion
-                   (and (futhark-backward-part)
-                        (= (line-number-at-pos) curline)
-                        (futhark-looking-at-word "else")
-                        (current-column))))
-               (current-column))))
-
-       ;; Align "else" to nearest "then" or "else if" or "if".
-       (save-excursion
-         (and (futhark-looking-at-word "else")
-              (let ((m
-                     (futhark-max
-                      (save-excursion
-                        (and
-                         (futhark-keyword-backward "then")
-                         (futhark-is-beginning-of-line-text)
-                         (point)))
-                      (save-excursion
-                        (let ((pos0 (futhark-keyword-backward "if")))
-                          (or
-                           (let ((curline (line-number-at-pos)))
-                             (and (futhark-backward-part)
-                                  (= (line-number-at-pos) curline)
-                                  (futhark-looking-at-word "else")
-                                  (point)))
-                           pos0))))))
-                (and (not (eq nil m))
-                     (goto-char m)
-                     (current-column)))))
+         (and (futhark-looking-at-word "else\\|then")
+              (futhark-find-principal-if)
+              (current-column)))
 
        ;; Align a function argument to the column of the first
        ;; argument to the function.
@@ -638,6 +608,15 @@ expression, if any."
      (forward-char 1)
      (futhark-goto-first-text)
      t)))
+
+(defun futhark-find-principal-if ()
+  "Find the 'if' keyword controlling the current 'else' or 'then'."
+  (futhark-keyword-backward "else\\|if")
+  (cond ((looking-at "else")
+         (futhark-find-principal-if)
+         (futhark-keyword-backward "if"))
+        ((looking-at "if")
+         t)))
 
 ;;; flycheck
 
