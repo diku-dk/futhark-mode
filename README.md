@@ -38,6 +38,11 @@ properly, please fix it, and put a small example in the
 `futhark-mode.el-corpus` directory to ensure that it doesn't break in
 the future.
 
+Note that not all of the indentation examples in
+`futhark-mode.el-corpus` are necessarily *ideal*.  Some of them
+exemplify behaviour that we would like to fix (but exist as a
+regression test to avoid even worse outcomes).
+
 ## Authors
 
 Initiated by Troels Henriksen in 2013.  Subsequently improved by:
