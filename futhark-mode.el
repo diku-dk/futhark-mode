@@ -233,22 +233,24 @@
     (modify-syntax-entry ?\{  "(}" st)
     (modify-syntax-entry ?\}  "){" st)
 
-    (modify-syntax-entry ?# "'" st)
+    (modify-syntax-entry ?# "'!~" st)
 
     ;; Symbol characters are treated as punctuation because they are
     ;; not able to form identifiers with word constituent 'w' class.
     ;; The '-' symbol is handled specially because it is also used for
     ;; line comments.
     (mapc (lambda (x)
-            (modify-syntax-entry x "_" st))
-          "+*/%=!><|&^.\\")
+            (modify-syntax-entry x "." st))
+          "+*/%=!><|&^")
+
+    (mapc (lambda (c) (modify-syntax-entry c "_" st)) "._'\\")
 
     (mapc (lambda (x)
             (modify-syntax-entry x "." st))
           ",:")
 
     ;; Define the -- line comment syntax.
-    (modify-syntax-entry ?- "_ 123" st)
+    (modify-syntax-entry ?- ". 123" st)
     st)
   "Syntax table used in `futhark-mode'.")
 
@@ -353,7 +355,8 @@ In general, prefer as little indentation as possible."
        ;; "loop", "case", or "\" column plus one indent level.
        (save-excursion
          (and (futhark-backward-part)
-              (looking-at "\\(?:=\\|->\\)[[:space:]]*$")
+              (futhark-forward-part)
+              (looking-at "[[:space:]]*\\(?:=\\|->\\)[[:space:]]*$")
               (let ((m
                      (futhark-max
                       (save-excursion
