@@ -455,6 +455,22 @@ In general, prefer as little indentation as possible."
                      (goto-char m)
                      (current-column)))))
 
+       ;; Align a function argument to the column of the first
+       ;; argument to the function.
+       (save-excursion
+         (let ((m (point))
+               (f (and (not (futhark-is-looking-at-keyword))
+                       (not (looking-at "[]})]"))
+                       (futhark-find-function))))
+           (when (and f (/= (point) m))
+             (or (save-excursion
+                  (and (futhark-forward-part)
+                       (futhark-forward-part)
+                       (futhark-backward-part)
+                       (/= m (point))
+                       (current-column)))
+                 (current-column)))))
+
        ;; Align general content inside parentheses to the first general
        ;; non-space content.
        (save-excursion
@@ -518,6 +534,12 @@ The net effect seems to be that it works ok."
   (and (not (bobp))
        (ignore-errors (backward-sexp 1) t)))
 
+(defun futhark-forward-part ()
+  "Try to jump forward one sexp.
+The net effect seems to be that it works ok."
+  (and (not (eobp))
+       (ignore-errors (forward-sexp 1) t)))
+
 (defun futhark-looking-at-word (word)
   "Do the same as `looking-at', but also check for blanks around WORD."
   (looking-at (concat "\\<" word "\\>")))
@@ -580,6 +602,26 @@ Ignore any program structure."
     (and (futhark-looking-at-word word)
          (point))))
 
+(defun futhark-find-function ()
+  "Find the start of the function being applied in the current
+expression, if any."
+  ;; This is pretty hacky, but it seems to work OK.
+  (or
+   (and (futhark-something-backward
+         (lambda () (or (futhark-looking-at-word "do\\|in")
+                        (save-excursion (and (futhark-forward-part)
+                                             (looking-at ",")))
+                        (looking-at "=\\|->\\|,"))))
+        ;; Go to just after the separator.
+        (futhark-forward-part)
+        ;; Go to just after the function.
+        (futhark-forward-part)
+        ;; Go to just before the function.
+        (futhark-backward-part))
+   (when (ignore-errors (backward-up-list 1) t)
+     (forward-char 1)
+     (futhark-goto-first-text)
+     t)))
 
 ;;; flycheck
 

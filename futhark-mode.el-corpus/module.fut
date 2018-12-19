@@ -1,6 +1,4 @@
 module A {
-  default (f32)
-
   include dog
 
   type a = int
