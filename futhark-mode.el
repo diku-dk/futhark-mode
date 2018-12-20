@@ -359,8 +359,9 @@ In general, prefer as little indentation as possible."
                (futhark-symbol-backward "=")
                (current-column))))
 
-       ;; If the previous code line ends with "=" or "->", align to the matching "let",
-       ;; "loop", "case", or "\" column plus one indent level.
+       ;; If the previous code line ends with "=" or "->", align to
+       ;; the matching "let", "entry", "loop", "case", or "\" column
+       ;; plus one indent level.
        (save-excursion
          (and (futhark-backward-part)
               (futhark-forward-part)
@@ -369,6 +370,8 @@ In general, prefer as little indentation as possible."
                      (futhark-max
                       (save-excursion
                         (futhark-keyword-backward "let"))
+                      (save-excursion
+                        (futhark-keyword-backward "entry"))
                       (save-excursion
                         (futhark-keyword-backward "loop"))
                       (save-excursion
