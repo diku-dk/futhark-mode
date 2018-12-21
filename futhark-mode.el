@@ -232,6 +232,8 @@
     (modify-syntax-entry ?\]  ")[" st)
     (modify-syntax-entry ?\{  "(}" st)
     (modify-syntax-entry ?\}  "){" st)
+    (modify-syntax-entry ?\" "\"" st)
+    (modify-syntax-entry ?\' "_" st)
 
     (modify-syntax-entry ?# "'!~" st)
 
@@ -438,6 +440,18 @@ In general, prefer as little indentation as possible."
                         (futhark-looking-at-word "case\\|match")
                         (current-column))))
                (current-column))))
+
+       ;; Align "else" to nearest "else if".  (this is to
+       ;; make if-then-else chains nicer).
+       (save-excursion
+         (and (looking-at "else\\|then")
+              (futhark-find-principal-if)
+              ;; If the "if" immediately follows an "else", then align
+              ;; to that "else" instead (this is to make if-then-else
+              ;; chains nicer).
+              (futhark-backward-part)
+              (futhark-looking-at-word "else")
+              (current-column)))
 
        ;; Align "else/then" to nearest "then" or "else if" or "if".
        (save-excursion

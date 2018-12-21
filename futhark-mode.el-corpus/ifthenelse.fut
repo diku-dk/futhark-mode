@@ -10,18 +10,26 @@ let foo () =
   if x
   then x
   else if x
-       then x
-       else x
+  then x else x
 
 let foo () =
   if x then x
   else if x then x
-       else x
+  else x
 
 let foo () =
   if a < b
   then if a < c then a else c
   else if b < c then b else c
+
+let foo () =
+  if a < b
+  then if a < c
+       then a
+       else c
+  else if b < c
+  then b
+  else c
 
 let foo () =
   let x =
@@ -33,3 +41,9 @@ let foo () =
   if x then y else
   if x then y else
   x
+
+let foo () =
+  if x then y
+  else if x then y
+  else if x then z
+  else 0
