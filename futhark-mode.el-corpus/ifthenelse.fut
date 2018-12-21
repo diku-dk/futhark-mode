@@ -47,3 +47,14 @@ let foo () =
   else if x then y
   else if x then z
   else 0
+
+let foo () =
+  if x
+  then y
+  else if x
+  then if a
+       then b
+       else c
+  else if x
+  then z
+  else 0
