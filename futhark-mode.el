@@ -334,7 +334,7 @@ In general, prefer as little indentation as possible."
        ;; Align closing parentheses and commas to the matching opening
        ;; parenthesis.
        (save-excursion
-         (and (looking-at (regexp-opt '(")" "]" ",")))
+         (and (looking-at (regexp-opt '(")" "]" "}" ",")))
               (ignore-errors
                 (backward-up-list 1)
                 (current-column))))
