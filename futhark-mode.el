@@ -322,22 +322,9 @@ In general, prefer as little indentation as possible."
                  (futhark-keyword-backward "local")
                  (futhark-keyword-backward "module")
                  (futhark-keyword-backward "open")
-                 (and
-                  (ignore-errors (backward-up-list 1) t)
-                  (or
-                   (futhark-keyword-backward "local")
-                   (futhark-keyword-backward "module")
-                   (futhark-keyword-backward "open"))))
+                 t)
                 (+ futhark-indent-level (current-column))))
              0))
-
-       ;; Align closing parentheses and commas to the matching opening
-       ;; parenthesis.
-       (save-excursion
-         (and (looking-at (regexp-opt '(")" "]" "}" ",")))
-              (ignore-errors
-                (backward-up-list 1)
-                (current-column))))
 
        ;; Align closing curly brackets to the matching opening 'module'
        ;; keyword.
@@ -351,11 +338,19 @@ In general, prefer as little indentation as possible."
                      (and
                       (backward-up-list 1)
                       (looking-at "(")
-                      (futhark-keyword-backward "module")
+                      (futhark-keyword-backward "module\\|open")
                       (current-column))))
                  (and
-                  (futhark-keyword-backward "module")
+                  (futhark-keyword-backward "module\\|open")
                   (current-column))))))
+
+       ;; Align closing parentheses and commas to the matching opening
+       ;; parenthesis.
+       (save-excursion
+         (and (looking-at (regexp-opt '(")" "]" "}" ",")))
+              (ignore-errors
+                (backward-up-list 1)
+                (current-column))))
 
        ;; Align additional constructors in a type abbreviation to the
        ;; '=' sign.
