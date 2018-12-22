@@ -152,6 +152,13 @@
     "A regex describing a Futhark type")
 
 
+  (defun futhark-syms-re (syms)
+    "Create a regular expression matching any of these symbols.
+This is useful because the normal word boundaries are not what we
+want (for example, we consider underscore to be part of a symbol
+name)."
+    (concat "\\_<" (regexp-opt syms t) "\\_>"))
+
   (defvar futhark-font-lock
     `(
 
@@ -172,7 +179,7 @@
 
       ;; Constants.
       ;;; Booleans.
-      (,(regexp-opt futhark-booleans 'words)
+      (,(futhark-syms-re futhark-booleans)
        . font-lock-constant-face)
 
       ;;; Numbers
@@ -190,7 +197,7 @@
       ;; Keywords.
       ;; Placed after constants, so e.g. '#open' is highlighted
       ;; as a value and not as a keyword.
-      (,(regexp-opt futhark-keywords 'words)
+      (,(futhark-syms-re futhark-keywords)
        . font-lock-keyword-face)
 
       ;; Types.
@@ -202,13 +209,13 @@
       (,(concat ":" ws "\\(" "[^=,)]+" "\\)")
        . '(1 font-lock-type-face))
       ;;; Builtin types.
-      (,(regexp-opt futhark-builtin-types 'words)
+      (,(futhark-syms-re futhark-builtin-types)
        . font-lock-type-face)
 
       ;; Builtins.
       ;;; Functions.
       ;;;; Builtin functions.
-      (,(regexp-opt futhark-builtin-functions 'words)
+      (,(futhark-syms-re futhark-builtin-functions)
        . font-lock-builtin-face)
       ;;; Operators.
       (,futhark-operator
