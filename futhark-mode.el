@@ -469,6 +469,13 @@ In general, prefer as little indentation as possible."
               (futhark-find-principal-if)
               (current-column)))
 
+       ;; Align an operator to the column of the first token on the
+       ;; previous line.
+       (save-excursion
+         (and (looking-at futhark-operator)
+              (futhark-find-function)
+              (current-column)))
+
        ;; Align a function argument to the column of the first
        ;; argument to the function.
        (save-excursion
