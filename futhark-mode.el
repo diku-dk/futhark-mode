@@ -5,7 +5,7 @@
 ;; URL: https://github.com/diku-dk/futhark-mode
 ;; Keywords: languages
 ;; Version: 0.2
-;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
+;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -39,190 +39,189 @@
     map)
   "Keymap for `futhark-mode'.")
 
+(defgroup futhark ()
+  "Editing Futhark code."
+  :group 'languages)
 
 ;;; Highlighting
 
-(let (
-      (ws "[[:space:]\n]*")
-      (ws1 "[[:space:]\n]+")
-      )
+(defvar futhark-ws "[[:space:]\n]*")
+(defvar futhark-ws1 "[[:space:]\n]+")
 
-  ;; FIXME: Backslash should also be a keyword (for anonymous functions), but
-  ;; Emacs Lisp is stupid.
-  (defconst futhark-keywords
-    '("if" "then" "else" "let" "loop" "in" "with" "type"
-      "val" "entry" "for" "while" "do" "case" "match"
-      "unsafe" "include" "import" "module" "open" "local" "assert")
-    "All Futhark keywords.")
+;; FIXME: Backslash should also be a keyword (for anonymous functions), but
+;; Emacs Lisp is stupid.
+(defconst futhark-keywords
+  '("if" "then" "else" "let" "loop" "in" "with" "type"
+    "val" "entry" "for" "while" "do" "case" "match"
+    "unsafe" "include" "import" "module" "open" "local" "assert")
+  "All Futhark keywords.")
 
-  (defconst futhark-builtin-functions
-    '("zip" "unzip" "map" "reduce"
-      "reduce_comm" "scan" "filter" "partition" "scatter" "stream_map"
-      "stream_map_per" "stream_red" "stream_map_per" "stream_seq"
-      "reduce_by_index")
-    "All Futhark builtin SOACs, functions, and non-symbolic operators.")
+(defconst futhark-builtin-functions
+  '("zip" "unzip" "map" "reduce"
+    "reduce_comm" "scan" "filter" "partition" "scatter" "stream_map"
+    "stream_map_per" "stream_red" "stream_map_per" "stream_seq"
+    "reduce_by_index")
+  "All Futhark builtin SOACs, functions, and non-symbolic operators.")
 
-  (defconst futhark-numeric-types
-    '("i8" "i16" "i32" "i64"
-      "u8" "u16" "u32" "u64"
-      "f32" "f64")
-    "A list of Futhark numeric types.")
+(defconst futhark-numeric-types
+  '("i8" "i16" "i32" "i64"
+    "u8" "u16" "u32" "u64"
+    "f32" "f64")
+  "A list of Futhark numeric types.")
 
-  (defconst futhark-builtin-types
-    (cons "bool" futhark-numeric-types)
-    "A list of Futhark types.")
+(defconst futhark-builtin-types
+  (cons "bool" futhark-numeric-types)
+  "A list of Futhark types.")
 
-  (defconst futhark-booleans
-    '("true" "false")
-    "All Futhark booleans.")
+(defconst futhark-booleans
+  '("true" "false")
+  "All Futhark booleans.")
 
-  (defconst futhark-number
-    (concat "-?"
-            "\\<\\(?:"
-            (concat "\\(?:"
-                    "\\(?:0[xX]\\)"
-                    "[0-9a-fA-F]+"
-                    "\\(?:\\.[0-9a-fA-F]+\\)?"
-                    "\\(?:[pP][+-]?[0-9]+\\)?"
-                    "\\|"
-                    "[0-9]+"
-                    "\\(?:\\.[0-9]+\\)?"
-                    "\\(?:e-?[0-9]+\\)?"
-                    "\\)"
-                    )
-            "\\(?:i8\\|i16\\|i32\\|i64\\|u8\\|u16\\|u32\\|u64\\|f32\\|f64\\)?"
-            "\\)\\>")
-    "All numeric constants, including hex float literals.")
+(defconst futhark-number
+  (concat "-?"
+          "\\<\\(?:"
+          (concat "\\(?:"
+                  "\\(?:0[xX]\\)"
+                  "[0-9a-fA-F]+"
+                  "\\(?:\\.[0-9a-fA-F]+\\)?"
+                  "\\(?:[pP][+-]?[0-9]+\\)?"
+                  "\\|"
+                  "[0-9]+"
+                  "\\(?:\\.[0-9]+\\)?"
+                  "\\(?:e-?[0-9]+\\)?"
+                  "\\)"
+                  )
+          "\\(?:i8\\|i16\\|i32\\|i64\\|u8\\|u16\\|u32\\|u64\\|f32\\|f64\\)?"
+          "\\)\\>")
+  "All numeric constants, including hex float literals.")
 
-  (defconst futhark-character
-    (concat "'[^']?'"))
+(defconst futhark-character
+  (concat "'[^']?'"))
 
-  (defconst futhark-var
-    (concat "\\(?:" "[_'[:alnum:]]+" "\\)")
-    "A regex describing a Futhark variable.")
+(defconst futhark-var
+  (concat "\\(?:" "[_'[:alnum:]]+" "\\)")
+  "A regex describing a Futhark variable.")
 
-  (defconst futhark-constructor
-    (concat "\\(?:" "#[_'[:alnum:]]+" "\\)")
-    "A regex describing a Futhark constructor.")
+(defconst futhark-constructor
+  (concat "\\(?:" "#[_'[:alnum:]]+" "\\)")
+  "A regex describing a Futhark constructor.")
 
-  (defconst futhark-operator
-    (concat "\\(?:"
-            (concat "["
-                    "-+*/%!<>=&|@"
-                    "]" "+")
-            "\\|"
-            "`[^`]*`"
-            "\\)"))
+(defconst futhark-operator
+  (concat "\\(?:"
+          (concat "["
+                  "-+*/%!<>=&|@"
+                  "]" "+")
+          "\\|"
+          "`[^`]*`"
+          "\\)"))
 
-  (defconst futhark-non-tuple-type
-    (concat "\\(?:"
-            "\\*" "?"
-            "\\(?:"
-            "\\["
-            "\\(?:"
-            ""
-            "\\|"
-            futhark-var
-            "\\)"
-            "\\]"
-            "\\)" "*"
-            futhark-var
-            "\\)"
-            )
-    "A regex describing a Futhark type which is not a tuple")
+(defconst futhark-non-tuple-type
+  (concat "\\(?:"
+          "\\*" "?"
+          "\\(?:"
+          "\\["
+          "\\(?:"
+          ""
+          "\\|"
+          futhark-var
+          "\\)"
+          "\\]"
+          "\\)" "*"
+          futhark-var
+          "\\)"
+          )
+  "A regex describing a Futhark type which is not a tuple.")
 
-  ;; This does not work with nested tuple types.
-  (defconst futhark-tuple-type
-    (concat "\\(?:"
-            "("
-            "\\(?:" ws futhark-non-tuple-type ws "," "\\)" "*"
-            ws futhark-non-tuple-type ws
-            ")"
-            "\\)"
-            )
-    "A regex describing a Futhark type which is a tuple")
+;; This does not work with nested tuple types.
+(defconst futhark-tuple-type
+  (concat "\\(?:"
+          "("
+          "\\(?:" futhark-ws futhark-non-tuple-type futhark-ws "," "\\)" "*"
+          futhark-ws futhark-non-tuple-type futhark-ws
+          ")"
+          "\\)"
+          )
+  "A regex describing a Futhark type which is a tuple.")
 
-  (defconst futhark-type
-    (concat "\\(?:"
-            futhark-non-tuple-type
-            "\\|"
-            futhark-tuple-type
-            "\\)"
-            )
-    "A regex describing a Futhark type")
+(defconst futhark-type
+  (concat "\\(?:"
+          futhark-non-tuple-type
+          "\\|"
+          futhark-tuple-type
+          "\\)"
+          )
+  "A regex describing a Futhark type.")
 
-
-  (defun futhark-syms-re (syms)
-    "Create a regular expression matching any of these symbols.
+(defun futhark-syms-re (syms)
+  "Create a regular expression matching any of the symbols in SYMS.
 This is useful because the normal word boundaries are not what we
 want (for example, we consider underscore to be part of a symbol
 name)."
-    (concat "\\_<" (regexp-opt syms t) "\\_>"))
+  (concat "\\_<" (regexp-opt syms t) "\\_>"))
 
-  (defvar futhark-font-lock
-    `(
+(defvar futhark-font-lock
+  `(
 
-      ;; Variable and tuple declarations.
+    ;; Variable and tuple declarations.
       ;;; Lets.
       ;;;; Primitive values.
-      (,(concat "let" ws1
-                "\\(" futhark-var "\\)")
-       . '(1 font-lock-variable-name-face))
+    (,(concat "let" futhark-ws1
+              "\\(" futhark-var "\\)")
+     . '(1 font-lock-variable-name-face))
       ;;;; Tuples.  FIXME: It would be nice to highlight only the variable names
       ;;;; inside the parantheses, and not also the commas.
-      (,(concat "let" ws1 "("
-                "\\(" "[^)]+" "\\)")
-       . '(1 font-lock-variable-name-face))
+    (,(concat "let" futhark-ws1 "("
+              "\\(" "[^)]+" "\\)")
+     . '(1 font-lock-variable-name-face))
       ;;; Function parameters.
-      (,(concat "\\(" futhark-var "\\)" ws ":")
-       . '(1 font-lock-variable-name-face))
+    (,(concat "\\(" futhark-var "\\)" futhark-ws ":")
+     . '(1 font-lock-variable-name-face))
 
-      ;; Constants.
+    ;; Constants.
       ;;; Booleans.
-      (,(futhark-syms-re futhark-booleans)
-       . font-lock-constant-face)
+    (,(futhark-syms-re futhark-booleans)
+     . font-lock-constant-face)
 
       ;;; Numbers
-      (,(concat "\\(" futhark-number "\\)")
-       . font-lock-constant-face)
+    (,(concat "\\(" futhark-number "\\)")
+     . font-lock-constant-face)
 
       ;;; Characters
-      (,(concat "\\(" futhark-character "\\)")
-       . font-lock-constant-face)
+    (,(concat "\\(" futhark-character "\\)")
+     . font-lock-constant-face)
 
       ;;; Constructors
-      (,(concat "\\(" futhark-constructor "\\)")
-       . font-lock-constant-face)
+    (,(concat "\\(" futhark-constructor "\\)")
+     . font-lock-constant-face)
 
-      ;; Keywords.
-      ;; Placed after constants, so e.g. '#open' is highlighted
-      ;; as a value and not as a keyword.
-      (,(futhark-syms-re futhark-keywords)
-       . font-lock-keyword-face)
+    ;; Keywords.
+    ;; Placed after constants, so e.g. '#open' is highlighted
+    ;; as a value and not as a keyword.
+    (,(futhark-syms-re futhark-keywords)
+     . font-lock-keyword-face)
 
-      ;; Types.
+    ;; Types.
       ;;; Type aliases.  FIXME: It would be nice to highlight also the right
       ;;; hand side.
-      (,(concat "type" ws1 "\\(" futhark-type "\\)")
-       . '(1 font-lock-type-face))
+    (,(concat "type" futhark-ws1 "\\(" futhark-type "\\)")
+     . '(1 font-lock-type-face))
       ;;; Function parameters types and return type.
-      (,(concat ":" ws "\\(" "[^=,)]+" "\\)")
-       . '(1 font-lock-type-face))
+    (,(concat ":" futhark-ws "\\(" "[^=,)]+" "\\)")
+     . '(1 font-lock-type-face))
       ;;; Builtin types.
-      (,(futhark-syms-re futhark-builtin-types)
-       . font-lock-type-face)
+    (,(futhark-syms-re futhark-builtin-types)
+     . font-lock-type-face)
 
-      ;; Builtins.
+    ;; Builtins.
       ;;; Functions.
       ;;;; Builtin functions.
-      (,(futhark-syms-re futhark-builtin-functions)
-       . font-lock-builtin-face)
+    (,(futhark-syms-re futhark-builtin-functions)
+     . font-lock-builtin-face)
       ;;; Operators.
-      (,futhark-operator
-       . font-lock-builtin-face)
-      )
-    "Highlighting expressions for Futhark.")
-  )
+    (,futhark-operator
+     . font-lock-builtin-face)
+    )
+  "Highlighting expressions for Futhark.")
 
 (defvar futhark-mode-syntax-table
   (let ((st (make-syntax-table)))
@@ -515,14 +514,14 @@ In general, prefer as little indentation as possible."
        ))))
 
 (defun futhark-min (&rest args)
-  "Like `min', but also accepts nil values."
+  "Like `min', but also accepts nil values in ARGS."
   (let ((args-nonnil (cl-remove-if-not 'identity args)))
     (if args-nonnil
         (apply 'min args-nonnil)
       nil)))
 
 (defun futhark-max (&rest args)
-  "Like `max', but also accepts nil values."
+  "Like `max', but also accepts nil values in ARGS."
   (let ((args-nonnil (cl-remove-if-not 'identity args)))
     (if args-nonnil
         (apply 'max args-nonnil)
@@ -587,6 +586,7 @@ The net effect seems to be that it works ok."
                   (re-search-backward "^[[:space:]]*$" bound))))))
 
 (defun futhark-something-backward (check)
+  "Do something backwards using CHECK."
   ;; FIXME: Support nested let-chains.  This used to work, but was removed
   ;; because the code was too messy.
   (let (;; Only look in the current paren-delimited code if present.
@@ -626,15 +626,13 @@ Set mark and return t if found; return nil otherwise."
 (defun futhark-keyword-backward-raw (word)
   "Go to a keyword WORD before the current position.
 Ignore any program structure."
-  (let ((pstart (point)))
-    (while (and (futhark-backward-part)
-                (not (futhark-looking-at-word word))))
-    (and (futhark-looking-at-word word)
-         (point))))
+  (while (and (futhark-backward-part)
+              (not (futhark-looking-at-word word))))
+  (and (futhark-looking-at-word word)
+       (point)))
 
 (defun futhark-find-function ()
-  "Find the start of the function being applied in the current
-expression, if any."
+  "Find the start of the function being applied in the current expression, if any."
   ;; This is pretty hacky, but it seems to work OK.
   (or
    (and (futhark-something-backward
@@ -690,7 +688,7 @@ See URL `https://github.com/diku-dk/futhark'."
 (defcustom futhark-interpreter-name "futharki"
   "Futhark interpreter to run.
 
-Do not put command-line options here; they go in `futhark-interpreter-args'."
+Do not put command line options here; they go in `futhark-interpreter-args'."
   :type 'string)
 
 (defcustom futhark-interpreter-args '()
@@ -698,25 +696,25 @@ Do not put command-line options here; they go in `futhark-interpreter-args'."
   :type '(repeat string))
 
 (defvar futhark-prompt-regexp "^\\(?:\\[[0-9]+\\]\\)"
-  "Prompt for `run-futhark'.")
+  "Prompt for `futhark-run'.")
 
-(defun run-futhark ()
+(defun futhark-run ()
   "Run an inferior instance of `futharki' inside Emacs."
   (interactive)
   (pop-to-buffer
    (apply 'make-comint "futharki" futhark-interpreter-name futhark-interpreter-args))
-  (inferior-futhark-mode))
+  (futhark-inferior-mode))
 
-(defvar inferior-futhark-mode-map
+(defvar futhark-inferior-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map comint-mode-map)
     map)
-  "Keymap for `inferior-futhark-mode'.")
+  "Keymap for `futhark-inferior-mode'.")
 
-(define-derived-mode inferior-futhark-mode comint-mode "futharki"
-  "Major mode for `run-futhark'.
+(define-derived-mode futhark-inferior-mode comint-mode "futharki"
+  "Major mode for `futhark-run'.
 
-\\<inferior-futhark-mode-map>"
+\\<futhark-inferior-mode-map>"
   nil "futhark"
   (setq comint-prompt-regexp futhark-prompt-regexp)
   ;; this makes it read only; a contentious subject as some prefer the
@@ -728,7 +726,7 @@ Do not put command-line options here; they go in `futhark-interpreter-args'."
   "Load FILE into the futharki process.
 FILE is the file visited by the current buffer.
 
-Automatically starts an inferior futharki process with `run-futhark`
+Automatically starts an inferior futharki process with `futhark-run`
 if a running futharki instance cannot be found."
   (interactive
    (list (or buffer-file-name
@@ -741,7 +739,7 @@ if a running futharki instance cannot be found."
          (with-current-buffer b
            (apply comint-input-sender (list p (concat ":load " file))))
          (pop-to-buffer b))
-      (run-futhark)
+      (futhark-run)
       (futhark-load-file file))))
 
 ;;; Actual mode declaration
