@@ -1,11 +1,11 @@
-;;; futhark-mode.el --- major mode for editing Futhark source files
+;;; futhark-mode.el --- major mode for editing Futhark source files -*- lexical-binding: t; -*-
 
 ;; Copyright (C) DIKU 2013-2019, University of Copenhagen
 ;;
 ;; URL: https://github.com/diku-dk/futhark-mode
 ;; Keywords: languages
 ;; Version: 0.2
-;; Package-Requires: ((cl-lib "0.5"))
+;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
 
 ;; This file is not part of GNU Emacs.
 
