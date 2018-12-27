@@ -1,4 +1,4 @@
-;;; futhark-mode.el --- major mode for editing Futhark source files -*- lexical-binding: t; -*-
+;;; futhark-mode.el --- major mode for editing Futhark source files  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) DIKU 2013-2019, University of Copenhagen
 ;;
