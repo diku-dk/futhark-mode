@@ -32,12 +32,12 @@ type- and syntax errors.
 
 ## Testing
 
-Run `test.sh` to test if the auto-indentation works.  If you find a
+Run `tools/test` to test if the auto-indentation works.  If you find a
 piece of code that futhark-mode cannot indent properly, please fix it,
-and put a small example in the `test-corpus` directory to ensure that it
-doesn't break in the future.
+and put a small example in the `tools/test-corpus` directory to ensure
+that it doesn't break in the future.
 
-Note that not all of the indentation examples in `test-corpus` are
+Note that not all of the indentation examples in `tools/test-corpus` are
 necessarily *ideal*.  Some of them exemplify behaviour that we would
 like to fix (but exist as a regression test to avoid even worse
 outcomes).
