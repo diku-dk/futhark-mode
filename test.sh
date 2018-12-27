@@ -6,7 +6,7 @@
 # On success, write nothing and return 0.  On failure, write the errors and
 # return 1.
 
-cd "$(dirname "$0")/futhark-mode.el-corpus"
+cd "$(dirname "$0")/test-corpus"
 
 futhark_indent() {
     ../futfmt "$file"

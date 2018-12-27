@@ -1,10 +1,10 @@
 ;;; futhark-mode.el --- major mode for editing Futhark source files
 
-;; Copyright (C) DIKU 2013-2017, University of Copenhagen
+;; Copyright (C) DIKU 2013-2019, University of Copenhagen
 ;;
-;; URL: https://github.com/diku-dk/futhark
+;; URL: https://github.com/diku-dk/futhark-mode
 ;; Keywords: languages
-;; Version: 0.1
+;; Version: 0.2
 ;; Package-Requires: ((cl-lib "0.5"))
 
 ;; This file is not part of GNU Emacs.
@@ -13,10 +13,10 @@
 ;; ICS <https://github.com/diku-dk/futhark-mode/blob/master/LICENSE>
 
 ;;; Commentary:
-;; Futhark is a small programming language designed to be compiled to
-;; efficient GPU code.  This Emacs mode provides syntax highlighting
-;; and conservative automatic indentation for Futhark source code.  A
-;; simple flycheck definition is also included.
+;; Futhark is a small programming language designed to be compiled to efficient
+;; GPU code.  This Emacs mode provides syntax highlighting, conservative
+;; automatic indentation, interpreter interaction, and a simple flycheck
+;; definition.
 ;;
 ;; Files with the ".fut" extension are automatically handled by this mode.
 ;;

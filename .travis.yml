@@ -15,4 +15,4 @@ addons:
     - emacs25
 
 script:
- - ./futhark-mode.el-corpus-test.sh
+ - ./test.sh
