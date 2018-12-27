@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# futhark-mode pre-commit hook for quality-checking the commit.
+#
+# This hook does the following:
+#
+#   * Checks for trailing whitespace.
+#   * Runs the test suite.
+
+fail() {
+    echo "Aborting commit due to verification errors."
+    echo "If you disagree, use git commit --no-verify."
+    exit 1
+}
+
+echo Quality-checking commit...
+echo
+
+# Find files with trailing whitespace
+if git diff-index --cached --check HEAD | egrep -v '^[+-]'; then
+    fail
+fi
+
+./tools/test

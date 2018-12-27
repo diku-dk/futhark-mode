@@ -42,6 +42,10 @@ necessarily *ideal*.  Some of them exemplify behaviour that we would
 like to fix (but exist as a regression test to avoid even worse
 outcomes).
 
+Additionally, you can symlink the `tools/git-hooks/pre-commit` hook into
+your local `.git/hooks` directory to automatically check your changes
+before each commit.
+
 ## Authors
 
 Initiated by Troels Henriksen in 2013.  Subsequently improved by:
