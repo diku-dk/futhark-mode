@@ -28,7 +28,8 @@ bells and whistles.  But it does have some commands:
     exist.
 
 Also consider `M-x flycheck-mode` to get immediate information about
-type- and syntax errors.
+type- and syntax errors (requires installation of the `flycheck` Emacs
+package).
 
 ## Testing
 
