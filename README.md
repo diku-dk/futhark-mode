@@ -52,5 +52,21 @@ before each commit.
 Initiated by Troels Henriksen in 2013.  Subsequently improved by:
 
   + Niels G. W. Serup
-  + Troels Henriksen
   + Rasmus Wriedt Larsen
+
+## Reloading when hacking on the code
+
+Add the directory containing the `.el` files to your load path with
+
+    (add-to-list 'load-path "/.../futhark-mode")
+
+and then evaluate
+
+    (progn
+      (ignore-errors (unload-feature 'futhark-highlight t))
+      (ignore-errors (unload-feature 'futhark-comint t))
+      (ignore-errors (unload-feature 'futhark-flycheck t))
+      (ignore-errors (unload-feature 'futhark-const t))
+      (ignore-errors (unload-feature 'futhark-smie t))
+      (ignore-errors (unload-feature 'futhark-mode t))
+      (require 'futhark-mode))
