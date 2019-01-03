@@ -18,6 +18,7 @@
 ;;; Code:
 
 (require 'flycheck nil t) ;; no error if not found (flycheck is optional)
+
 (when (featurep 'flycheck)
   (flycheck-define-checker futhark
     "A Futhark syntax and type checker.

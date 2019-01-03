@@ -32,3 +32,7 @@ let h' (n: i32) =
     in n
   let n = n + 2
   in n
+
+let h'' (n: i32) =
+  loop x for _i < n do
+    advance

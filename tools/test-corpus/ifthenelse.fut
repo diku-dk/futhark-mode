@@ -40,7 +40,14 @@ let foo () =
 let foo () =
   if x then y else
   if x then y else
-  x
+    x
+
+let foo () =
+  if x
+  then y
+  else
+  let z = 3
+  in z
 
 let foo () =
   if x then y
@@ -58,3 +65,11 @@ let foo () =
   else if x
   then z
   else 0
+
+let foo () =
+  if cond
+  then
+  let cost[id] = cost[tid] + 1
+  let updating_graph_mask[id] = true
+  in (cost, updating_graph_mask)
+  else baz

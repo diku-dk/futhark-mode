@@ -12,3 +12,7 @@ let h = map (\(x) ->
 let f = map (\x ->
                x ||
                f)
+
+let f = map (\x
+              y ->
+               y + x)

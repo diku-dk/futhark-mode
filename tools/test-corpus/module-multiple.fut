@@ -11,6 +11,8 @@ module B {
     entry cat () : int = 0
   }
 
+  val u = 4
+
   module C {
     type c = f32
   }

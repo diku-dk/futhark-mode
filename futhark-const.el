@@ -17,11 +17,14 @@
 
 ;;; Code:
 
+(defconst futhark-const-indent-level 2
+  "The basic indent level for `futhark-mode'.")
+
 (defconst futhark-const-ws "[[:space:]\n]*")
 (defconst futhark-const-ws1 "[[:space:]\n]+")
 
-;; FIXME: Backslash should also be a keyword (for anonymous functions), but
-;; Emacs Lisp is stupid.
+;; XXX: Backslash should also be a keyword (for anonymous functions), but Emacs
+;; Lisp is stupid.
 (defconst futhark-const-keywords
   '("if" "then" "else" "let" "loop" "in" "with" "type"
     "val" "entry" "for" "while" "do" "case" "match"
@@ -123,6 +126,19 @@
           "\\)"
           )
   "A regex describing a Futhark type.")
+
+(defvar futhark-const-keywords-regexp
+  (regexp-opt '("|>" "<|"
+                "||" "&&"
+                "<=" ">=" ">" "<" "==" "!="
+                "&" "^" "|"
+                "<<" ">>"
+                "+" "-"
+                "*" "/" "%" "//" "%%"
+                "**"
+                "!"
+                "=" ":" "," "\\" "->"))
+  "All operator-like keywords put in a regexp.")
 
 (provide 'futhark-const)
 

@@ -27,7 +27,7 @@
 
 (require 'futhark-const)
 (require 'futhark-highlight)
-(require 'futhark-indent)
+(require 'futhark-smie)
 (require 'futhark-comint)
 (require 'futhark-flycheck)
 
@@ -51,14 +51,14 @@
 (define-derived-mode futhark-mode prog-mode "Futhark"
   "Major mode for editing Futhark source files."
   :syntax-table futhark-highlight-syntax-table
-  (setq-local font-lock-defaults '(futhark-highlight-font-lock))
-  (setq-local indent-line-function 'futhark-indent-line)
-  (setq-local indent-region-function nil)
   (setq-local comment-start "--")
   (setq-local comment-start-skip "--[ \t]*")
   (setq-local paragraph-start (concat " *-- |\\| ==$\\|[ \t]*$\\|" page-delimiter))
   (setq-local paragraph-separate (concat " *-- ==$\\|[ \t]*$\\|" page-delimiter))
-  (setq-local comment-padding " "))
+  (setq-local comment-padding " ")
+  (setq-local font-lock-defaults '(futhark-highlight-font-lock))
+  (futhark-smie-setup) ; sets up indentation
+)
 
 (provide 'futhark-mode)
 

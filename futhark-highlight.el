@@ -35,7 +35,7 @@ name)."
     (,(concat "let" futhark-const-ws1
               "\\(" futhark-const-var "\\)")
      . '(1 font-lock-variable-name-face))
-      ;;;; Tuples.  FIXME: It would be nice to highlight only the variable names
+      ;;;; Tuples.  XXX: It would be nice to highlight only the variable names
       ;;;; inside the parantheses, and not also the commas.
     (,(concat "let" futhark-const-ws1 "("
               "\\(" "[^)]+" "\\)")
@@ -68,8 +68,8 @@ name)."
      . font-lock-keyword-face)
 
     ;; Types.
-      ;;; Type aliases.  FIXME: It would be nice to highlight also the right
-      ;;; hand side.
+      ;;; Type aliases.  XXX: It would be nice to highlight also the right hand
+      ;;; side.
     (,(concat "type" futhark-const-ws1 "\\(" futhark-const-type "\\)")
      . '(1 font-lock-type-face))
       ;;; Function parameters types and return type.
