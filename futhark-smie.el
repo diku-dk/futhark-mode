@@ -263,51 +263,6 @@ whitespace characters."
       "toplevel-let")))
 
 
-;; Lexer extension: Our limited grammar can confuse SMIE into thinking that a
-;; the first token in top-level declaration such as 'type ...' or 'import ...'
-;; can be used like a binary operator to whatever previously defined (e.g., if
-;; the previous line ended with '... = 3', then a subsequent 'import ...' would
-;; be indented relative to '3').
-;;
-;; We solve this by forcing the following literal into the consistent
-;; 'statement-token' form, meaning we can write grammar rules with two
-;; subsequent tokens, in turn stifling SMIE's overeager indentation heuristics
-;; (this is not so much a limitation of the grammar type, but more of how the
-;; otherwise sane defaults of the indentation engine work against us in edge
-;; cases).
-
-(defun futhark-smie-forward-token-statement ()
-  "Find the next token."
-  (futhark-smie-forward-token-base)
-  (save-excursion
-    (futhark-smie-backward-token-base)
-    (let ((start (point)))
-      (futhark-smie-backward-token-base)
-      (when (and (/= start (point))
-                 (or (looking-at (futhark-smie-symbol "import"))
-                     (looking-at (futhark-smie-symbol "include"))
-                     (looking-at (futhark-smie-symbol "module"))
-                     (looking-at (futhark-smie-symbol "open"))
-                     (looking-at (futhark-smie-symbol "type"))
-                     (looking-at (futhark-smie-symbol "val"))))
-        "statement-token"))))
-
-(defun futhark-smie-backward-token-statement ()
-  "Find the previous token."
-  (futhark-smie-backward-token-base)
-  (let ((start (point)))
-    (save-excursion
-      (futhark-smie-backward-token-base)
-      (when (and (/= start (point))
-                 (or (looking-at (futhark-smie-symbol "import"))
-                     (looking-at (futhark-smie-symbol "include"))
-                     (looking-at (futhark-smie-symbol "module"))
-                     (looking-at (futhark-smie-symbol "open"))
-                     (looking-at (futhark-smie-symbol "type"))
-                     (looking-at (futhark-smie-symbol "val"))))
-        "statement-token"))))
-
-
 (defun futhark-smie-forward-token ()
   "Find the next Futhark token, if any."
   (let ((start (point)))
@@ -315,7 +270,6 @@ whitespace characters."
         (futhark-smie-try futhark-smie-forward-token-type-constructor)
         (futhark-smie-try futhark-smie-forward-token-in-implicit)
         (futhark-smie-try futhark-smie-forward-token-toplevel-let)
-        (futhark-smie-try futhark-smie-forward-token-statement)
         (futhark-smie-forward-token-base))))
 
 (defun futhark-smie-backward-token ()
@@ -325,7 +279,6 @@ whitespace characters."
         (futhark-smie-try futhark-smie-backward-token-type-constructor)
         (futhark-smie-try futhark-smie-backward-token-in-implicit)
         (futhark-smie-try futhark-smie-backward-token-toplevel-let)
-        (futhark-smie-try futhark-smie-backward-token-statement)
         (futhark-smie-backward-token-base))))
 
 (defmacro futhark-smie-first-token (func-token func-sexp)
@@ -423,19 +376,25 @@ Return its point."
             ("loop" pat "=" exp "while" exp "do" exp)
             ("match" exp "case" match-cases)
             )
-       (decl ("entry" pats "=" exp)
-             ("toplevel-let" pats "=" exp)
-             ("type" "statement-token")
-             ("val" "statement-token")
-             ("include" "statement-token")
-             ("import" "statement-token")
-             ("module" "statement-token")
-             ("open" "statement-token"))
-       )
+
+       ;; We describe the declarations in terms of separators, not
+       ;; openers/closers.  SMIE's operator precedence grammar engine gets less
+       ;; confused this way.
+       (decls (decls "entry" decls)
+              (decls "toplevel-let" decls)
+              (decls "type" decls)
+              (decls "val" decls)
+              (decls "include" decls)
+              (decls "import" decls)
+              (decls "module" decls)
+              (decls "open" decls)))
+
      ;; Resolve conflicts (poorly): If more than one relation exists between two
      ;; tokens (i.e., a shift/reduce conflict), just collapse the relations into
      ;; a single '=' relation (i.e., shift).
-     '((assoc "," "|" "case" "->")))
+     '((assoc "entry" "toplevel-let" "type" "val" "include" "import" "module" "open"))
+     '((assoc "," "|" "case" "->"))
+     )
 
     ;; Basic operator precedences.
     (smie-precs->prec2
@@ -465,6 +424,16 @@ Return its point."
     ('(:after . "in")
      (smie-rule-parent))
 
+    ;; Indent the following line one level.  This is a bit hacky because of our
+    ;; declarations-as-separators grammar rules.
+    ('(:after . "=")
+     (let ((base
+            (futhark-smie-max
+             (futhark-smie-first-backward-token "toplevel-let")
+             (futhark-smie-first-backward-token "let"))))
+       (when base
+         `(column . ,(+ (futhark-smie-column-of base) futhark-const-indent-level)))))
+
     ('(:before . "in-implicit")
      (save-excursion
        (ignore-errors (backward-sexp 1) t)
@@ -475,7 +444,7 @@ Return its point."
                       "include" "import" "module" "open" "local"))
      (when (smie-rule-bolp)
        (let ((outer (futhark-smie-find-outer-module)))
-         (if outer (+ outer futhark-const-indent-level) 0))))
+         `(column . ,(if outer (+ outer futhark-const-indent-level) 0)))))
 
     ;; Even when our heuristic has designated a 'let' as a top-level 'let', it
     ;; might still be wrong.  We disable auto-indentation and let the user

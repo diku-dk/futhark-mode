@@ -18,3 +18,8 @@ module B {
     let z = 0
     in 0
 }
+
+module C = {
+  open (F R)
+  open B
+}
