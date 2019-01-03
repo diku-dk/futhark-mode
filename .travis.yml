@@ -14,6 +14,11 @@ addons:
     packages:
     - emacs25
 
+before_install:
+  - mkdir -p $HOME/.local/bin
+  - ln -s $(which emacs25) $HOME/.local/bin/emacs
+  - export PATH=$HOME/.local/bin:$PATH
+
 script:
   - emacs --version
   - ./tools/test-indentation
