@@ -419,15 +419,15 @@ Return its point."
 (defun futhark-smie-rules (kind token)
   "The SMIE rules for indentation.  See SMIE documentation for info on KIND and TOKEN."
   (pcase (cons kind token)
-    ('(:elem . basic) futhark-const-indent-level)
-    ('(:elem . args) 0)
+    (`(:elem . basic) futhark-const-indent-level)
+    (`(:elem . args) 0)
 
-    ('(:after . "in")
+    (`(:after . "in")
      (smie-rule-parent))
 
     ;; Indent the following line one level.  This is a bit hacky because of our
     ;; declarations-as-separators grammar rules.
-    ('(:after . "=")
+    (`(:after . "=")
      (let ((base
             (futhark-smie-max
              (futhark-smie-first-backward-token "toplevel-let")
@@ -435,7 +435,7 @@ Return its point."
        (when base
          `(column . ,(+ (futhark-smie-column-of base) futhark-const-indent-level)))))
 
-    ('(:before . "in-implicit")
+    (`(:before . "in-implicit")
      (save-excursion
        (ignore-errors (backward-sexp 1) t)
        (when (looking-at (futhark-smie-symbol "let"))
@@ -450,7 +450,7 @@ Return its point."
     ;; Even when our heuristic has designated a 'let' as a top-level 'let', it
     ;; might still be wrong.  We disable auto-indentation and let the user
     ;; decide manually.
-    ('(:before . "toplevel-let")
+    (`(:before . "toplevel-let")
      `(column . ,(current-column)))
 
     (`(:after . ,(or "then" "else" "do"))
@@ -458,10 +458,10 @@ Return its point."
                                     ; special cases
        (smie-rule-parent)))
 
-    ('(:after . "unsafe") ; indent next token directly under 'unsafe'
+    (`(:after . "unsafe") ; indent next token directly under 'unsafe'
      `(column . ,(current-column)))
 
-    ('(:before . ",")
+    (`(:before . ",")
      (when (smie-rule-bolp)
        (smie-rule-parent)))
 
@@ -469,15 +469,15 @@ Return its point."
      (smie-rule-parent futhark-const-indent-level))
 
     ;; Handle long 'val' declarations by disabling auto-indentation.
-    ('(:before . "->")
+    (`(:before . "->")
      (when (smie-rule-bolp)
        (let ((valp (futhark-smie-first-backward-token "val")))
          (when (and valp
                     (> valp (or (futhark-smie-first-backward-token "\\") 0))
                     (> valp (or (futhark-smie-first-backward-token "case") 0)))
-           '(column . (current-column))))))
+           `(column . (current-column))))))
 
-    ('(:after . "->")
+    (`(:after . "->")
      (cond ((smie-rule-parent-p "\\") ; lambdas
             futhark-const-indent-level)
            ((save-excursion ; case expressions
@@ -488,7 +488,7 @@ Return its point."
               (futhark-smie-backward-token)
               `(column . ,(+ (current-column) futhark-const-indent-level))))))
 
-    ('(:before . "if")
+    (`(:before . "if")
      (and
       (smie-rule-bolp)
       (smie-rule-parent-p "if")
@@ -504,13 +504,13 @@ Return its point."
         (equal (futhark-smie-backward-token) "else")
         -5))) ; length of 'else ' (relative un-indent)
 
-    ('(:before . "|") ; in type constructor definitions
+    (`(:before . "|") ; in type constructor definitions
      (when (and (smie-rule-bolp)
                 (progn (futhark-smie-backward-token) t)
                 (looking-at "#"))
        (smie-rule-parent (- 0 futhark-const-indent-level))))
 
-    ('(:before . "case")
+    (`(:before . "case")
      `(column . ,(futhark-smie-max (futhark-smie-column-of
                                     (futhark-smie-first-backward-token "match"))
                                    (futhark-smie-column-of
