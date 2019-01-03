@@ -15,4 +15,4 @@ addons:
     - emacs25
 
 script:
- - ./test.sh
+ - ./tools/test-indentation
