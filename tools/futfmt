@@ -1,8 +1,11 @@
 #!/bin/sh
 ":"; exec emacs --quick --script "$0" "$(dirname "$0")" "$@" # -*-emacs-lisp-*-
 
-;; Suppress certain messages.  From <http://superuser.com/a/1025827>.
+;;; Code:
+
 (defun suppress-messages (old-fun &rest args)
+  "Suppress certain messages.
+From <http://superuser.com/a/1025827>."
   (advice-add 'message :around #'ignore)
   (unwind-protect
       (apply old-fun args)
@@ -17,6 +20,7 @@
 ;; Lisp code), so they cannot easily be suppressed.
 
 (defun futfmt-print-help ()
+  "Print help."
   (princ "Usage: futfmt [-i] FILE\n\n")
   (princ "Indent a Futhark program.\n")
   (princ "If not -i, output the indented buffer on standard out.\n")
@@ -32,23 +36,23 @@
       (has-args (elt argv 1)))
   (if (not has-args)
       (futfmt-print-help)
-    (setq is-inline (string= (elt argv 1) "-i"))
-    (setq futhark-file-path (or (and is-inline (elt argv 2))
-                                (elt argv 1)))
-    (setq do-read-from-stdin (string= futhark-file-path "-"))
-    (if do-read-from-stdin
-        (let ((fut-buffer (get-buffer-create "temp.fut")))
-          (set-buffer fut-buffer)
-          (let (line)
-            (while (setq line (ignore-errors (read-from-minibuffer "")))
-              (insert (concat line "\n"))
-              )))
-      (find-file futhark-file-path))
-    (futhark-mode)
-    (indent-region (point-min) (point-max))
-    (if (and is-inline (not do-read-from-stdin))
-        (save-buffer)
-      (princ (buffer-string)))))
+    (let* ((is-inline (string= (elt argv 1) "-i"))
+           (futhark-file-path (or (and is-inline (elt argv 2))
+                                  (elt argv 1)))
+           (do-read-from-stdin (string= futhark-file-path "-")))
+      (if do-read-from-stdin
+          (let ((fut-buffer (get-buffer-create "temp.fut")))
+            (set-buffer fut-buffer)
+            (let (line)
+              (while (setq line (ignore-errors (read-from-minibuffer "")))
+                (insert (concat line "\n"))
+                )))
+        (find-file futhark-file-path))
+      (futhark-mode)
+      (indent-region (point-min) (point-max))
+      (if (and is-inline (not do-read-from-stdin))
+          (save-buffer)
+        (princ (buffer-string))))))
 
 ;; Exit.
 (kill-emacs 0)
