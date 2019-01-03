@@ -5,7 +5,7 @@
 # This hook does the following:
 #
 #   * Checks for trailing whitespace.
-#   * Runs the test suite.
+#   * Runs the auto-indentation test suite.
 
 fail() {
     echo "Aborting commit due to verification errors."
@@ -21,4 +21,4 @@ if git diff-index --cached --check HEAD | egrep -v '^[+-]'; then
     fail
 fi
 
-./tools/test
+./tools/test-indentation
