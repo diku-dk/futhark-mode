@@ -318,11 +318,12 @@ Return its point."
        ;; We need to go two levels up in case of functors like
        ;;
        ;;   module foo = bar({ ... })
-       (progn
-         (ignore-errors (backward-up-list 1) t)
-         (futhark-smie-max
-          (futhark-smie-column-of (futhark-smie-first-backward-token "module"))
-          (futhark-smie-column-of (futhark-smie-first-backward-token "open"))))))))
+       (and
+        (equal (futhark-smie-backward-token) "")
+        (ignore-errors (backward-up-list 1) t)
+        (futhark-smie-max
+         (futhark-smie-column-of (futhark-smie-first-backward-token "module"))
+         (futhark-smie-column-of (futhark-smie-first-backward-token "open"))))))))
 
 
 ;;; Grammar for the parser:
@@ -526,7 +527,7 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
           ;; Align closing '}' to 'module'/'open', and not directly to the
           ;; matching '{' (as SMIE would seemingly have it).
           ((looking-at "}")
-           (or (futhark-smie-find-outer-module) 0))
+           (futhark-smie-find-outer-module))
 
           ;; If both the current and previous line is empty (at most
           ;; whitespace), indent optimally w.r.t. top-level constructs, as it is
