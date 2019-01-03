@@ -10,9 +10,9 @@ git:
 addons:
   apt:
     sources:
-      - sourceline: ppa:kelleyk/emacs
+      - sourceline: 'ppa:adrozdoff/emacs'
     packages:
-    - emacs26
+    - emacs25
 
 script:
  - ./tools/test-indentation
