@@ -18,6 +18,7 @@
 ;;; Code:
 
 (require 'smie) ; built-in
+(require 'cl-lib)
 (require 'futhark-const)
 
 
