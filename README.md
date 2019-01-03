@@ -13,7 +13,7 @@ See the file `futhark-mode.el`.  This Emacs mode provides:
 
 You can install this mode with Emacs' package manager.  Enable the
 https://melpa.org/ archive, and install the `futhark-mode` package.
-Alternatively, add the following lines to your Emacs init file:
+*Alternatively*, add the following lines to your Emacs init file:
 
     (add-to-list 'load-path "path/to/futhark-mode")
     (require 'futhark-mode)
