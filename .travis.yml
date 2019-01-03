@@ -15,4 +15,5 @@ addons:
     - emacs25
 
 script:
- - ./tools/test-indentation
+  - emacs --version
+  - ./tools/test-indentation
