@@ -68,4 +68,10 @@ and then evaluate
       (ignore-errors (unload-feature 'futhark-const t))
       (ignore-errors (unload-feature 'futhark-smie t))
       (ignore-errors (unload-feature 'futhark-mode t))
-      (require 'futhark-mode))
+      (require 'futhark-mode)
+
+      (mapc (lambda (buf)
+                (with-current-buffer buf
+                  (if (string-match "\\.fut$" (buffer-name buf))
+                      (futhark-mode))))
+              (buffer-list)))
