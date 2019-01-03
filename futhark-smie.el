@@ -467,6 +467,15 @@ Return its point."
     (`(:after . ":") ; functors
      (smie-rule-parent futhark-const-indent-level))
 
+    ;; Handle long 'val' declarations by disabling auto-indentation.
+    ('(:before . "->")
+     (when (smie-rule-bolp)
+       (let ((valp (futhark-smie-first-backward-token "val")))
+         (when (and valp
+                    (> valp (or (futhark-smie-first-backward-token "\\") 0))
+                    (> valp (or (futhark-smie-first-backward-token "case") 0)))
+           '(column . (current-column))))))
+
     ('(:after . "->")
      (cond ((smie-rule-parent-p "\\") ; lambdas
             futhark-const-indent-level)
