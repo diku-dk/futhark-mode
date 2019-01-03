@@ -49,10 +49,9 @@ before each commit.
 
 ## Authors
 
-Initiated by Troels Henriksen in 2013.  Subsequently improved by:
-
   + Niels G. W. Serup
   + Rasmus Wriedt Larsen
+  + Troels Henriksen
 
 ## Reloading when hacking on the code
 
