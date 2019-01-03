@@ -431,6 +431,7 @@ Return its point."
      (let ((base
             (futhark-smie-max
              (futhark-smie-first-backward-token "toplevel-let")
+             (futhark-smie-first-backward-token "entry")
              (futhark-smie-first-backward-token "let"))))
        (when base
          `(column . ,(+ (futhark-smie-column-of base) futhark-const-indent-level)))))
