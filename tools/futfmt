@@ -3,11 +3,10 @@
 
 ;; Suppress certain messages.  From <http://superuser.com/a/1025827>.
 (defun suppress-messages (old-fun &rest args)
-  (cl-flet ((silence (&rest args1) (ignore)))
-    (advice-add 'message :around #'silence)
-    (unwind-protect
-        (apply old-fun args)
-      (advice-remove 'message #'silence))))
+  (advice-add 'message :around #'ignore)
+  (unwind-protect
+      (apply old-fun args)
+    (advice-remove 'message #'silence)))
 
 ;; Having "Indenting region..." messages on stderr are silly.
 (when (fboundp 'advice-add)

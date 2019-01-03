@@ -20,7 +20,7 @@
 (require 'smie) ; built-in
 (require 'cl-lib)
 (require 'futhark-const)
-
+(require 'cl-lib)
 
 ;;; Lexer:
 
