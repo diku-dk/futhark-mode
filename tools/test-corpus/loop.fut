@@ -36,3 +36,7 @@ let h' (n: i32) =
 let h'' (n: i32) =
   loop x for _i < n do
     advance
+
+let k =
+  loop k =
+    k while i < n do k

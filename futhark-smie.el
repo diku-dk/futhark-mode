@@ -428,13 +428,14 @@ Return its point."
     ;; Indent the following line one level.  This is a bit hacky because of our
     ;; declarations-as-separators grammar rules.
     (`(:after . "=")
-     (let ((base
-            (futhark-smie-max
-             (futhark-smie-first-backward-token "toplevel-let")
-             (futhark-smie-first-backward-token "entry")
-             (futhark-smie-first-backward-token "let"))))
-       (when base
-         `(column . ,(+ (futhark-smie-column-of base) futhark-const-indent-level)))))
+     (unless (smie-rule-parent-p "loop")
+       (let ((base
+              (futhark-smie-max
+               (futhark-smie-first-backward-token "toplevel-let")
+               (futhark-smie-first-backward-token "entry")
+               (futhark-smie-first-backward-token "let"))))
+         (when base
+           `(column . ,(+ (futhark-smie-column-of base) futhark-const-indent-level))))))
 
     (`(:before . "in-implicit")
      (save-excursion
