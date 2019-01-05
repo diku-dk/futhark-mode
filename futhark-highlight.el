@@ -93,22 +93,20 @@ name)."
 (defvar futhark-highlight-syntax-table
   (let ((st (make-syntax-table)))
     (modify-syntax-entry ?\n ">" st)
-    ;; Make apostrophe and underscore be part of variable names.
-    ;; Technically, they should probably be part of the symbol class,
-    ;; but it works out better for some of the regexpes if they are part
-    ;; of the word class.
+    ;; Make ' and # be part of the word class.  Technically, they should
+    ;; probably be part of the symbol class, but unlike _ they typically occur
+    ;; only in the beginning or end of a word, so this makes `backward-word' and
+    ;; `forward-word' nicer to use.
     (modify-syntax-entry ?' "w" st)
-    (modify-syntax-entry ?_ "w" st)
+    (modify-syntax-entry ?# "w" st)
+
     (modify-syntax-entry ?\( "()" st)
     (modify-syntax-entry ?\) ")(" st)
-    (modify-syntax-entry ?\[  "(]" st)
-    (modify-syntax-entry ?\]  ")[" st)
-    (modify-syntax-entry ?\{  "(}" st)
-    (modify-syntax-entry ?\}  "){" st)
+    (modify-syntax-entry ?\[ "(]" st)
+    (modify-syntax-entry ?\] ")[" st)
+    (modify-syntax-entry ?\{ "(}" st)
+    (modify-syntax-entry ?\} "){" st)
     (modify-syntax-entry ?\" "\"" st)
-    (modify-syntax-entry ?\' "_" st)
-
-    (modify-syntax-entry ?# "'!~" st)
 
     ;; Symbol characters are treated as punctuation because they are
     ;; not able to form identifiers with word constituent 'w' class.
@@ -118,7 +116,7 @@ name)."
             (modify-syntax-entry x "." st))
           "+*/%=!><|&^")
 
-    (mapc (lambda (c) (modify-syntax-entry c "_" st)) "._'\\")
+    (mapc (lambda (c) (modify-syntax-entry c "_" st)) "._\\")
 
     (mapc (lambda (x)
             (modify-syntax-entry x "." st))

@@ -128,24 +128,6 @@ whitespace characters."
           nil)))))
 
 
-;; Lexer extension: Allow literal tokens like '#foo'.
-
-(defun futhark-smie-forward-token-type-constructor ()
-  "Find the next token."
-  (let ((found (futhark-smie-forward-token-base)))
-    (when (and (equal found "")
-               (looking-at "#"))
-      (goto-char (1+ (point)))
-      (concat "#" (futhark-smie-forward-token-base)))))
-
-(defun futhark-smie-backward-token-type-constructor ()
-  "Find the previous token."
-  (let ((found (futhark-smie-backward-token-base)))
-    (goto-char (1- (point)))
-    (when (looking-at "#")
-      (concat "#" found))))
-
-
 ;; Lexer extension: Support 'let' chains with the 'in's left out.  Operator
 ;; precedence grammars are quite limited, but we still want to be able to
 ;; express these very typical cases properly.  It is easy to write a grammar
@@ -267,7 +249,6 @@ whitespace characters."
   "Find the next Futhark token, if any."
   (let ((start (point)))
     (or (futhark-smie-try futhark-smie-forward-token-local)
-        (futhark-smie-try futhark-smie-forward-token-type-constructor)
         (futhark-smie-try futhark-smie-forward-token-in-implicit)
         (futhark-smie-try futhark-smie-forward-token-toplevel-let)
         (futhark-smie-forward-token-base))))
@@ -276,7 +257,6 @@ whitespace characters."
   "Find the previous Futhark token, if any."
   (let ((start (point)))
     (or (futhark-smie-try futhark-smie-backward-token-local)
-        (futhark-smie-try futhark-smie-backward-token-type-constructor)
         (futhark-smie-try futhark-smie-backward-token-in-implicit)
         (futhark-smie-try futhark-smie-backward-token-toplevel-let)
         (futhark-smie-backward-token-base))))
