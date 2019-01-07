@@ -1,11 +1,11 @@
-;;; futhark-smie.el --- SMIE definition for futhark-mode  -*- lexical-binding: t; -*-
+;;; futhark-indent.el --- automatic indentation for futhark-mode  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) DIKU 2013-2019, University of Copenhagen
 ;;
 ;; URL: https://github.com/diku-dk/futhark-mode
 ;; Keywords: languages
 ;; Version: 0.2
-;; Package-Requires: ((emacs "24.3"))
+;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -19,21 +19,25 @@
 
 (require 'smie) ; built-in
 (require 'cl-lib)
-(require 'futhark-const)
+
+
+(defconst futhark-indent-level 2
+  "The basic indent level for `futhark-mode'.")
+
 
 ;;; Lexer:
 
-(defun futhark-smie-symbol (word)
+(defun futhark-indent-symbol (word)
   "Add blanks around WORD."
   (concat "\\<" word "\\>"))
 
-(defun futhark-smie-looking-back-at (word)
+(defun futhark-indent-looking-back-at (word)
   "Do the same as `looking-at', but move one token back before checking for WORD."
   (save-excursion
-    (futhark-smie-backward-token-base)
+    (futhark-indent-backward-token-base)
     (looking-at word)))
 
-(defun futhark-smie-is-empty-line ()
+(defun futhark-indent-is-empty-line ()
   "Check if the line of the current point is empty.
 It is considered empty if the line consists of zero or more
 whitespace characters."
@@ -42,90 +46,42 @@ whitespace characters."
     (or (looking-at "[[:space:]]*\n")
         (looking-at "[[:space:]]*$"))))
 
-(defun futhark-smie-max (&rest args)
+(defun futhark-indent-max (&rest args)
   "Like `max', but also accepts nil values in ARGS."
   (let ((args-nonnil (cl-remove-if-not 'identity args)))
     (if args-nonnil
         (apply 'max args-nonnil)
       nil)))
 
-(defun futhark-smie-column-of (p)
+(defun futhark-indent-column-of (p)
   "Get the column of point P."
   (when p
     (save-excursion
       (goto-char p)
       (current-column))))
 
-(defmacro futhark-smie-try (func)
+(defmacro futhark-indent-try (func)
   "Try to use FUNC, but go back to the point in START on nil return."
   `(or (,func) (progn (goto-char start) nil)))
 
-(defun futhark-smie-forward-token-base ()
+(defun futhark-indent-forward-token-base ()
   "Find the next Futhark token, if any."
   (forward-comment (point-max))
-  (cond
-   ((looking-at futhark-const-keywords-regexp)
-    (goto-char (match-end 0))
-    (match-string-no-properties 0))
-   (t (buffer-substring-no-properties
-       (point)
-       (progn (skip-syntax-forward "w_")
-              (point))))))
+  (buffer-substring-no-properties
+   (point)
+   (progn (or (/= 0 (skip-syntax-forward "w_")) ; variables, keywords
+              (skip-syntax-forward ".")) ; operators, keywords
+          (point))))
 
-(defun futhark-smie-backward-token-base ()
+(defun futhark-indent-backward-token-base ()
   "Find the previous Futhark token, if any."
   (forward-comment (- (point)))
-  (cond
-   ((looking-back futhark-const-keywords-regexp (- (point) 2) t)
-    (goto-char (match-beginning 0))
-    (match-string-no-properties 0))
-   (t (buffer-substring-no-properties
-       (point)
-       (let ((prevp (point)))
-         (progn (skip-syntax-backward "w_")
-                ;; The "_" syntax class also covers backslashes, which we
-                ;; consider separate.
-                (when (and (looking-at "\\\\") (/= prevp (point)))
-                  (goto-char (1+ (point))))
-                (point)))))))
-
-
-;; Lexer extension: Consider two subsequent tokens 'local' and any token in
-;; `futhark-smie-token-locals'.  We ignore the 'local' token and record this
-;; sequence of tokens as the second token only.  For example, 'local type'
-;; becomes just 'type' internally.  This simplifies the indentation rules.
-
-(defconst futhark-smie-token-locals
-  '("val" "type" "module" "signature" "open" "import" "include" "entry" "let")
-  "These keywords can be preceded by 'local'.")
-
-(defun futhark-smie-forward-token-local ()
-  "Find the next token."
-  (let ((found (futhark-smie-forward-token-base)))
-    (when (equal found "local")
-      (let ((savep (point))
-            (found1 (futhark-smie-forward-token-base)))
-        (if (member found1 futhark-smie-token-locals)
-            (if (equal found1 "let")
-                ;; 'local let ...' is not used inside functions, so we assume
-                ;; that this 'let' has the same qualities as a toplevel let.
-                "toplevel-let"
-              found1)
-          (goto-char savep)
-          "local")))))
-
-(defun futhark-smie-backward-token-local ()
-  "Find the previous token."
-  (let ((found (futhark-smie-backward-token-base)))
-    (when (member found futhark-smie-token-locals)
-      (let ((savep (point))
-            (found1 (futhark-smie-backward-token-base)))
-        (if (equal found1 "local")
-            (if (equal found "let")
-                "toplevel-let"
-              found)
-          (goto-char savep)
-          nil)))))
+  (buffer-substring-no-properties
+   (point)
+   (let ((prevp (point)))
+     (progn (or (/= 0 (skip-syntax-backward "w_"))
+                (skip-syntax-backward "."))
+            (point)))))
 
 
 ;; Lexer extension: Support 'let' chains with the 'in's left out.  Operator
@@ -145,45 +101,45 @@ whitespace characters."
 ;;
 ;; where the intermediate 'in's are implicit.  We solve this by using the empty
 ;; space just prior to 'let' as the 'in-implicit' token.  There will always be
-;; at least `futhark-const-indent-level' empty spaces, since this only needs to
+;; at least `futhark-indent-level' empty spaces, since this only needs to
 ;; work on non-top-level 'let's.
 
-(defun futhark-smie-forward-token-in-implicit ()
+(defun futhark-indent-forward-token-in-implicit ()
   "Find the next token."
   (when (looking-at "  let") ; currently on the 'in-implicit' token.
     ;; Normalise the point position.
-    (futhark-smie-backward-token-base)
-    (futhark-smie-forward-token-base))
-  (if (not (or (futhark-smie-looking-back-at "=")
-               (futhark-smie-looking-back-at "->")
-               (futhark-smie-looking-back-at (futhark-smie-symbol "in"))
-               (futhark-smie-looking-back-at (futhark-smie-symbol "then"))
-               (futhark-smie-looking-back-at (futhark-smie-symbol "else"))
-               (futhark-smie-looking-back-at (futhark-smie-symbol "do"))
-               (futhark-smie-looking-back-at (futhark-smie-symbol "unsafe"))
+    (futhark-indent-backward-token-base)
+    (futhark-indent-forward-token-base))
+  (if (not (or (futhark-indent-looking-back-at "=")
+               (futhark-indent-looking-back-at "->")
+               (futhark-indent-looking-back-at (futhark-indent-symbol "in"))
+               (futhark-indent-looking-back-at (futhark-indent-symbol "then"))
+               (futhark-indent-looking-back-at (futhark-indent-symbol "else"))
+               (futhark-indent-looking-back-at (futhark-indent-symbol "do"))
+               (futhark-indent-looking-back-at (futhark-indent-symbol "unsafe"))
                (save-excursion
                  (forward-line 0)
                  (looking-at "[^{\n]*{[[:space:]]*$"))
-               (futhark-smie-is-empty-line)
+               (futhark-indent-is-empty-line)
                (save-excursion
                  (forward-line 1)
-                 (futhark-smie-is-empty-line))
+                 (futhark-indent-is-empty-line))
                (looking-at " ")))
-      (let ((found (futhark-smie-forward-token-base)))
+      (let ((found (futhark-indent-forward-token-base)))
         (and (equal found "let")
              (progn (goto-char (- (point) 4))
                     t)
              (looking-at " ")
              "in-implicit"))))
 
-(defun futhark-smie-backward-token-in-implicit ()
+(defun futhark-indent-backward-token-in-implicit ()
   "Find the previous token."
   (when (looking-at " let")
-    (futhark-smie-forward-token-base)
-    (futhark-smie-backward-token-base))
-  (if (looking-at (futhark-smie-symbol "let"))
+    (futhark-indent-forward-token-base)
+    (futhark-indent-backward-token-base))
+  (if (looking-at (futhark-indent-symbol "let"))
       (let ((let-point (point))
-            (found (futhark-smie-backward-token-base)))
+            (found (futhark-indent-backward-token-base)))
         (and (not (or (equal found "=")
                       (equal found "->")
                       (equal found "in")
@@ -194,10 +150,10 @@ whitespace characters."
                       (save-excursion
                         (forward-line 0)
                         (looking-at "[^{\n]*{[[:space:]]*$"))
-                      (futhark-smie-is-empty-line)
+                      (futhark-indent-is-empty-line)
                       (save-excursion
                         (forward-line 1)
-                        (futhark-smie-is-empty-line))))
+                        (futhark-indent-is-empty-line))))
              (progn (goto-char (- let-point 2))
                     t)
              (looking-at " ")
@@ -209,59 +165,57 @@ whitespace characters."
 ;; non-comment line is blank, or if it is the first declaration inside a module,
 ;; then it is top-level (which is a pretty poor way of checking it).
 
-(defun futhark-smie-forward-token-toplevel-let ()
+(defun futhark-indent-forward-token-toplevel-let ()
   "Find the next token."
-  (let ((found (futhark-smie-forward-token-base)))
+  (let ((found (futhark-indent-forward-token-base)))
     (when (and (equal found "let")
                (or (save-excursion
                      (forward-line -1)
-                     (or (futhark-smie-is-empty-line)
+                     (or (futhark-indent-is-empty-line)
                          (looking-at "[^{\n]*{[[:space:]]*$")))
                    (save-excursion
-                     (futhark-smie-backward-token-base)
+                     (futhark-indent-backward-token-base)
                      (let ((line (line-number-at-pos)))
                        (forward-comment (- (point)))
                        (and (/= line (line-number-at-pos))
                             (progn (forward-line 1) t)
-                            (futhark-smie-is-empty-line))))
+                            (futhark-indent-is-empty-line))))
                    (= (line-number-at-pos (point)) 1)))
       "toplevel-let")))
 
-(defun futhark-smie-backward-token-toplevel-let ()
+(defun futhark-indent-backward-token-toplevel-let ()
   "Find the previous token."
-  (let ((found (futhark-smie-backward-token-base)))
+  (let ((found (futhark-indent-backward-token-base)))
     (when (and (equal found "let")
                (or (save-excursion
                      (forward-line -1)
-                     (or (futhark-smie-is-empty-line)
+                     (or (futhark-indent-is-empty-line)
                          (looking-at "[^{\n]*{[[:space:]]*$")))
                    (save-excursion
                      (let ((line (line-number-at-pos)))
                        (forward-comment (- (point)))
                        (and (/= line (line-number-at-pos))
                             (progn (forward-line 1) t)
-                            (futhark-smie-is-empty-line))))
+                            (futhark-indent-is-empty-line))))
                    (= (line-number-at-pos (point)) 1)))
       "toplevel-let")))
 
 
-(defun futhark-smie-forward-token ()
+(defun futhark-indent-forward-token ()
   "Find the next Futhark token, if any."
   (let ((start (point)))
-    (or (futhark-smie-try futhark-smie-forward-token-local)
-        (futhark-smie-try futhark-smie-forward-token-in-implicit)
-        (futhark-smie-try futhark-smie-forward-token-toplevel-let)
-        (futhark-smie-forward-token-base))))
+    (or (futhark-indent-try futhark-indent-forward-token-in-implicit)
+        (futhark-indent-try futhark-indent-forward-token-toplevel-let)
+        (futhark-indent-forward-token-base))))
 
-(defun futhark-smie-backward-token ()
+(defun futhark-indent-backward-token ()
   "Find the previous Futhark token, if any."
   (let ((start (point)))
-    (or (futhark-smie-try futhark-smie-backward-token-local)
-        (futhark-smie-try futhark-smie-backward-token-in-implicit)
-        (futhark-smie-try futhark-smie-backward-token-toplevel-let)
-        (futhark-smie-backward-token-base))))
+    (or (futhark-indent-try futhark-indent-backward-token-in-implicit)
+        (futhark-indent-try futhark-indent-backward-token-toplevel-let)
+        (futhark-indent-backward-token-base))))
 
-(defmacro futhark-smie-first-token (func-token func-sexp)
+(defmacro futhark-indent-first-token (func-token func-sexp)
   "Go to the first token through FUNC-TOKEN and FUNC-SEXP.
 Return its point."
   `(save-excursion
@@ -276,39 +230,39 @@ Return its point."
         (setq cur (if (= (point) cur) nil (point))))
       (when found (point)))))
 
-(defun futhark-smie-first-backward-token (token)
+(defun futhark-indent-first-backward-token (token)
   "Go to the first token TOKEN before the current position, if it exists.
 Return its point."
-  (futhark-smie-first-token futhark-smie-backward-token backward-sexp))
+  (futhark-indent-first-token futhark-indent-backward-token backward-sexp))
 
-(defun futhark-smie-first-forward-token (token)
+(defun futhark-indent-first-forward-token (token)
   "Go to the first token TOKEN after the current position, if it exists.
 Return its point."
-  (futhark-smie-first-token futhark-smie-forward-token forward-sexp))
+  (futhark-indent-first-token futhark-indent-forward-token forward-sexp))
 
-(defun futhark-smie-find-outer-module ()
+(defun futhark-indent-find-outer-module ()
   "Try to find the 'module' or 'open' enclosing the current code block."
   (save-excursion
     (ignore-errors (backward-up-list 1) t)
     (when (or (looking-at "{") (looking-at "("))
-      (futhark-smie-max
-       (futhark-smie-column-of (futhark-smie-first-backward-token "module"))
-       (futhark-smie-column-of (futhark-smie-first-backward-token "open"))
+      (futhark-indent-max
+       (futhark-indent-column-of (futhark-indent-first-backward-token "module"))
+       (futhark-indent-column-of (futhark-indent-first-backward-token "open"))
 
        ;; We need to go two levels up in case of functors like
        ;;
        ;;   module foo = bar({ ... })
        (and
-        (equal (futhark-smie-backward-token) "")
+        (equal (futhark-indent-backward-token) "")
         (ignore-errors (backward-up-list 1) t)
-        (futhark-smie-max
-         (futhark-smie-column-of (futhark-smie-first-backward-token "module"))
-         (futhark-smie-column-of (futhark-smie-first-backward-token "open"))))))))
+        (futhark-indent-max
+         (futhark-indent-column-of (futhark-indent-first-backward-token "module"))
+         (futhark-indent-column-of (futhark-indent-first-backward-token "open"))))))))
 
 
-;;; Grammar for the parser:
+;;; Grammar for the SMIE parser:
 
-(defconst futhark-smie-grammar
+(defconst futhark-indent-grammar
   (smie-prec2->grammar
    (smie-merge-prec2s
 
@@ -368,12 +322,13 @@ Return its point."
               (decls "include" decls)
               (decls "import" decls)
               (decls "module" decls)
-              (decls "open" decls)))
+              (decls "open" decls)
+              (decls "local" decls)))
 
      ;; Resolve conflicts (poorly): If more than one relation exists between two
      ;; tokens (i.e., a shift/reduce conflict), just collapse the relations into
      ;; a single '=' relation (i.e., shift).
-     '((assoc "entry" "toplevel-let" "type" "val" "include" "import" "module" "open"))
+     '((assoc "entry" "toplevel-let" "type" "val" "include" "import" "module" "open" "local"))
      '((assoc "," "|" "case" "->"))
      )
 
@@ -396,10 +351,10 @@ Return its point."
 
 ;;; Extra indentation rules to supplement the grammar-generated ones:
 
-(defun futhark-smie-rules (kind token)
+(defun futhark-indent-rules (kind token)
   "The SMIE rules for indentation.  See SMIE documentation for info on KIND and TOKEN."
   (pcase (cons kind token)
-    (`(:elem . basic) futhark-const-indent-level)
+    (`(:elem . basic) futhark-indent-level)
     (`(:elem . args) 0)
 
     (`(:after . "in")
@@ -409,25 +364,31 @@ Return its point."
     ;; declarations-as-separators grammar rules.
     (`(:after . "=")
      (unless (smie-rule-parent-p "loop")
-       (let ((base
-              (futhark-smie-max
-               (futhark-smie-first-backward-token "toplevel-let")
-               (futhark-smie-first-backward-token "entry")
-               (futhark-smie-first-backward-token "let"))))
+       (let ((base (futhark-indent-max
+                    (futhark-indent-first-backward-token "toplevel-let")
+                    (futhark-indent-first-backward-token "let")
+                    (futhark-indent-first-backward-token "entry"))))
          (when base
-           `(column . ,(+ (futhark-smie-column-of base) futhark-const-indent-level))))))
+           ;; In the case of 'local let ...' lines, indent relative to 'local',
+           ;; not 'let'.
+           (let* ((base-local
+                   (save-excursion
+                     (goto-char base)
+                     (when (equal (futhark-indent-backward-token) "local") (point))))
+                  (base (or base-local base)))
+             `(column . ,(+ (futhark-indent-column-of base) futhark-indent-level)))))))
 
     (`(:before . "in-implicit")
      (save-excursion
        (ignore-errors (backward-sexp 1) t)
-       (when (looking-at (futhark-smie-symbol "let"))
+       (when (looking-at (futhark-indent-symbol "let"))
          `(column . ,(current-column)))))
 
     (`(:before . ,(or "entry" "type" "val"
                       "include" "import" "module" "open" "local"))
      (when (smie-rule-bolp)
-       (let ((outer (futhark-smie-find-outer-module)))
-         `(column . ,(if outer (+ outer futhark-const-indent-level) 0)))))
+       (let ((outer (futhark-indent-find-outer-module)))
+         `(column . ,(if outer (+ outer futhark-indent-level) 0)))))
 
     ;; Even when our heuristic has designated a 'let' as a top-level 'let', it
     ;; might still be wrong.  We disable auto-indentation and let the user
@@ -448,27 +409,27 @@ Return its point."
        (smie-rule-parent)))
 
     (`(:after . ":") ; functors
-     (smie-rule-parent futhark-const-indent-level))
+     (smie-rule-parent futhark-indent-level))
 
     ;; Handle long 'val' declarations by disabling auto-indentation.
     (`(:before . "->")
      (when (smie-rule-bolp)
-       (let ((valp (futhark-smie-first-backward-token "val")))
+       (let ((valp (futhark-indent-first-backward-token "val")))
          (when (and valp
-                    (> valp (or (futhark-smie-first-backward-token "\\") 0))
-                    (> valp (or (futhark-smie-first-backward-token "case") 0)))
+                    (> valp (or (futhark-indent-first-backward-token "\\") 0))
+                    (> valp (or (futhark-indent-first-backward-token "case") 0)))
            `(column . (current-column))))))
 
     (`(:after . "->")
      (cond ((smie-rule-parent-p "\\") ; lambdas
-            futhark-const-indent-level)
+            futhark-indent-level)
            ((save-excursion ; case expressions
-              (futhark-smie-backward-token)
-              (equal (futhark-smie-backward-token) "case"))
+              (futhark-indent-backward-token)
+              (equal (futhark-indent-backward-token) "case"))
             (save-excursion
-              (futhark-smie-backward-token)
-              (futhark-smie-backward-token)
-              `(column . ,(+ (current-column) futhark-const-indent-level))))))
+              (futhark-indent-backward-token)
+              (futhark-indent-backward-token)
+              `(column . ,(+ (current-column) futhark-indent-level))))))
 
     (`(:before . "if")
      (and
@@ -480,25 +441,25 @@ Return its point."
      (save-excursion
        (and
         (smie-rule-bolp)
-        (progn (futhark-smie-forward-token)
+        (progn (futhark-indent-forward-token)
                (ignore-errors (backward-sexp 1) t) t)
-        (looking-at (futhark-smie-symbol "if"))
-        (equal (futhark-smie-backward-token) "else")
+        (looking-at (futhark-indent-symbol "if"))
+        (equal (futhark-indent-backward-token) "else")
         -5))) ; length of 'else ' (relative un-indent)
 
     (`(:before . "|") ; in type constructor definitions
      (when (and (smie-rule-bolp)
-                (progn (futhark-smie-backward-token) t)
+                (progn (futhark-indent-backward-token) t)
                 (looking-at "#"))
-       (smie-rule-parent (- 0 futhark-const-indent-level))))
+       (smie-rule-parent (- 0 futhark-indent-level))))
 
     (`(:before . "case")
-     `(column . ,(futhark-smie-max (futhark-smie-column-of
-                                    (futhark-smie-first-backward-token "match"))
-                                   (futhark-smie-column-of
-                                    (futhark-smie-first-backward-token "case")))))))
+     `(column . ,(futhark-indent-max (futhark-indent-column-of
+                                    (futhark-indent-first-backward-token "match"))
+                                   (futhark-indent-column-of
+                                    (futhark-indent-first-backward-token "case")))))))
 
-(defun futhark-smie-indent-line-basic ()
+(defun futhark-indent-line-basic ()
   "Try to indent the current line.
 Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lines."
   (forward-line 0)
@@ -509,17 +470,17 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
           ;; Align closing '}' to 'module'/'open', and not directly to the
           ;; matching '{' (as SMIE would seemingly have it).
           ((looking-at "}")
-           (futhark-smie-find-outer-module))
+           (futhark-indent-find-outer-module))
 
           ;; If both the current and previous line is empty (at most
           ;; whitespace), indent optimally w.r.t. top-level constructs, as it is
           ;; likely one of those come next.
-          ((and (futhark-smie-is-empty-line)
+          ((and (futhark-indent-is-empty-line)
                 (save-excursion
                   (forward-line -1)
-                  (futhark-smie-is-empty-line)))
-           (let ((outer (futhark-smie-find-outer-module)))
-             (if outer (+ outer futhark-const-indent-level) 0)))
+                  (futhark-indent-is-empty-line)))
+           (let ((outer (futhark-indent-find-outer-module)))
+             (if outer (+ outer futhark-indent-level) 0)))
 
           ;; Indent a '}'-subsequent line relative to the '}' symbol.
           ((save-excursion
@@ -543,7 +504,7 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
           ;; this edge case we force the insertion of spaces, and leave the
           ;; heavy lifting to SMIE.
           ((and (equal "let" (save-excursion
-                               (futhark-smie-forward-token)))
+                               (futhark-indent-forward-token)))
                 (save-excursion
                   (forward-line 0)
                   (looking-at "[[:space:]]?let\\>")))
@@ -559,44 +520,44 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
           ;; *empty* line, and only if that empty line has a very specific
           ;; context; if the programmer writes something else than a new
           ;; binding, that will also be indented correctly.
-          ((and (futhark-smie-is-empty-line)
+          ((and (futhark-indent-is-empty-line)
                 (save-excursion
                   (forward-line -1)
-                  (member (futhark-smie-forward-token) '("in-implicit" "let")))
+                  (member (futhark-indent-forward-token) '("in-implicit" "let")))
                 (save-excursion
-                  (not (equal "=" (futhark-smie-backward-token)))))
-           (futhark-smie-column-of (futhark-smie-first-backward-token "let")))
+                  (not (equal "=" (futhark-indent-backward-token)))))
+           (futhark-indent-column-of (futhark-indent-first-backward-token "let")))
 
           ;; Do not auto-indent multi-line function parameters.
           (t
            (let ((cur (point))
-                 (function-start (futhark-smie-max
-                                  (futhark-smie-first-backward-token "toplevel-let")
-                                  (futhark-smie-first-backward-token "entry"))))
+                 (function-start (futhark-indent-max
+                                  (futhark-indent-first-backward-token "toplevel-let")
+                                  (futhark-indent-first-backward-token "entry"))))
              (when function-start
                (save-excursion
                  (goto-char function-start)
-                 (let ((first-eq (futhark-smie-first-forward-token "=")))
+                 (let ((first-eq (futhark-indent-first-forward-token "=")))
                    (when (and first-eq
                               (< cur first-eq))
                      cur-col)))))))))
     (when indent
       (progn (indent-line-to indent) t))))
 
-(defun futhark-smie-indent-line ()
+(defun futhark-indent-line ()
   "Indent the current line.
 Puts an extra layer of hacks in front of SMIE."
   (let ((start (point)))
-    (or (futhark-smie-try futhark-smie-indent-line-basic)
+    (or (futhark-indent-try futhark-indent-line-basic)
         (smie-indent-line))))
 
-(defun futhark-smie-setup ()
+(defun futhark-indent-setup ()
   "Setup Emacs' Simple Minded Indentation Engine for Futhark."
-  (smie-setup futhark-smie-grammar #'futhark-smie-rules
-              :backward-token #'futhark-smie-backward-token
-              :forward-token #'futhark-smie-forward-token)
-  (setq-local indent-line-function 'futhark-smie-indent-line))
+  (smie-setup futhark-indent-grammar #'futhark-indent-rules
+              :backward-token #'futhark-indent-backward-token
+              :forward-token #'futhark-indent-forward-token)
+  (setq-local indent-line-function 'futhark-indent-line))
 
-(provide 'futhark-smie)
+(provide 'futhark-indent)
 
-;;; futhark-smie.el ends here
+;;; futhark-indent.el ends here

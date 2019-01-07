@@ -59,19 +59,4 @@ Add the directory containing the `.el` files to your load path with
 
     (add-to-list 'load-path "/.../futhark-mode")
 
-and then evaluate
-
-    (progn
-      (ignore-errors (unload-feature 'futhark-highlight t))
-      (ignore-errors (unload-feature 'futhark-comint t))
-      (ignore-errors (unload-feature 'futhark-flycheck t))
-      (ignore-errors (unload-feature 'futhark-const t))
-      (ignore-errors (unload-feature 'futhark-smie t))
-      (ignore-errors (unload-feature 'futhark-mode t))
-      (require 'futhark-mode)
-
-      (mapc (lambda (buf)
-                (with-current-buffer buf
-                  (if (string-match "\\.fut$" (buffer-name buf))
-                      (futhark-mode))))
-              (buffer-list)))
+and then enter `M-x RET futhark-mode-dev-reload RET` whenever needed.

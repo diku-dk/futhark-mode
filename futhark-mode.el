@@ -5,7 +5,7 @@
 ;; URL: https://github.com/diku-dk/futhark-mode
 ;; Keywords: languages
 ;; Version: 0.2
-;; Package-Requires: ((emacs "24.3"))
+;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -25,9 +25,9 @@
 
 ;;; Code:
 
-(require 'futhark-const)
+(require 'cl-lib)
 (require 'futhark-highlight)
-(require 'futhark-smie)
+(require 'futhark-indent)
 (require 'futhark-comint)
 (require 'futhark-flycheck)
 
@@ -44,21 +44,81 @@
     map)
   "Keymap for `futhark-mode'.")
 
+(defvar futhark-syntax-table
+  (let ((st (make-syntax-table)))
+    (modify-syntax-entry ?\n ">" st)
+    ;; Make ' and # be part of the word class.  Technically, they should
+    ;; probably be part of the symbol class, but unlike _ they typically occur
+    ;; only in the beginning or end of a word, so this makes `backward-word' and
+    ;; `forward-word' nicer to use.
+    (modify-syntax-entry ?' "w" st)
+    (modify-syntax-entry ?# "w" st)
+
+    (modify-syntax-entry ?\( "()" st)
+    (modify-syntax-entry ?\) ")(" st)
+    (modify-syntax-entry ?\[ "(]" st)
+    (modify-syntax-entry ?\] ")[" st)
+    (modify-syntax-entry ?\{ "(}" st)
+    (modify-syntax-entry ?\} "){" st)
+    (modify-syntax-entry ?\" "\"" st)
+
+    ;; Symbol characters are treated as punctuation because they are
+    ;; not able to form identifiers with word constituent 'w' class.
+    ;; The '-' symbol is handled specially because it is also used for
+    ;; line comments.
+    (mapc (lambda (x)
+            (modify-syntax-entry x "." st))
+          "+*/%=!><|&^\\")
+
+    (mapc (lambda (c) (modify-syntax-entry c "_" st)) "._")
+
+    (mapc (lambda (x)
+            (modify-syntax-entry x "." st))
+          ",:")
+
+    ;; Define the -- line comment syntax.
+    (modify-syntax-entry ?- ". 123" st)
+    st)
+  "Syntax table used in `futhark-mode'.")
+
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.fut\\'" . futhark-mode))
 
 ;;;###autoload
 (define-derived-mode futhark-mode prog-mode "Futhark"
   "Major mode for editing Futhark source files."
-  :syntax-table futhark-highlight-syntax-table
+  :syntax-table futhark-syntax-table
   (setq-local comment-start "--")
   (setq-local comment-start-skip "--[ \t]*")
   (setq-local paragraph-start (concat " *-- |\\| ==$\\|[ \t]*$\\|" page-delimiter))
   (setq-local paragraph-separate (concat " *-- ==$\\|[ \t]*$\\|" page-delimiter))
   (setq-local comment-padding " ")
   (setq-local font-lock-defaults '(futhark-highlight-font-lock))
-  (futhark-smie-setup) ; sets up indentation
-)
+  (futhark-indent-setup))
+
+(defun futhark-mode-dev-reload ()
+  "FOR DEVELOPMENT: Unload and re-require all of futhark-mode.
+Also reapply futhark-mode to all futhark-mode buffers."
+  (interactive)
+
+  (let ((futhark-mode-buffers
+         (cl-remove-if-not (lambda (buf)
+                             (with-current-buffer buf
+                               (eq major-mode 'futhark-mode)))
+                           (buffer-list))))
+
+    (ignore-errors (unload-feature 'futhark-mode t))
+    (ignore-errors (unload-feature 'futhark-highlight t))
+    (ignore-errors (unload-feature 'futhark-indent t))
+    (ignore-errors (unload-feature 'futhark-comint t))
+    (ignore-errors (unload-feature 'futhark-flycheck t))
+
+    (require 'futhark-mode)
+
+    (mapc (lambda (buf)
+            (with-current-buffer buf
+              (futhark-mode)))
+          futhark-mode-buffers)))
 
 (provide 'futhark-mode)
 
