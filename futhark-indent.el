@@ -447,10 +447,11 @@ Return its point."
         -5))) ; length of 'else ' (relative un-indent)
 
     (`(:before . "|") ; in type constructor definitions
-     (when (and (smie-rule-bolp)
-                (progn (futhark-indent-backward-token) t)
-                (looking-at "#"))
-       (smie-rule-parent (- 0 futhark-indent-level))))
+     (let ((p (and (smie-rule-bolp)
+                   (progn (futhark-indent-backward-token)
+                          (looking-at "#"))
+                   (futhark-indent-first-backward-token "="))))
+       (when p `(column . ,(futhark-indent-column-of p)))))
 
     (`(:before . "case")
      `(column . ,(futhark-indent-max (futhark-indent-column-of
