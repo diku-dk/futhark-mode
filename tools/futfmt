@@ -15,6 +15,9 @@ From <http://superuser.com/a/1025827>."
 (when (fboundp 'advice-add)
   (advice-add 'indent-region :around #'suppress-messages))
 
+;; Also get rid of "Loading vc-git..." messages in older emacsen.
+(remove-hook 'find-file-hook 'vc-find-file-hook)
+
 ;; "Wrote" messages (from `save-buffer') are also a bit annoying, but seem to
 ;; originate in the `write-region' function from Emacs' C code (and not Emacs
 ;; Lisp code), so they cannot easily be suppressed.
