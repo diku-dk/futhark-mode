@@ -78,10 +78,9 @@ whitespace characters."
   (forward-comment (- (point)))
   (buffer-substring-no-properties
    (point)
-   (let ((prevp (point)))
-     (progn (or (/= 0 (skip-syntax-backward "w_"))
-                (skip-syntax-backward "."))
-            (point)))))
+   (progn (or (/= 0 (skip-syntax-backward "w_"))
+              (skip-syntax-backward "."))
+          (point))))
 
 
 ;; Lexer extension: Support 'let' chains with the 'in's left out.  Operator
