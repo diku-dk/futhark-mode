@@ -10,14 +10,21 @@ git:
 addons:
   apt:
     sources:
-      - sourceline: 'ppa:adrozdoff/emacs'
+      - sourceline: 'ppa:kelleyk/emacs'
     packages:
-    - emacs25
+    - emacs25 emacs26
 
 before_install:
-  - mkdir -p $HOME/.local/bin
-  - ln -s $(which emacs25) $HOME/.local/bin/emacs
-  - export PATH=$HOME/.local/bin:$PATH
+  - mkdir -p $HOME/emacs24 $HOME/emacs25 $HOME/emacs26
+  - ln -s $(which emacs24) $HOME/emacs24/emacs
+  - ln -s $(which emacs25) $HOME/emacs25/emacs
+  - ln -s $(which emacs26) $HOME/emacs26/emacs
+
+matrix:
+  include:
+    - env: PATH=$PATH/emacs24:$PATH
+    - env: PATH=$HOME/emacs25:$PATH
+    - env: PATH=$HOME/emacs26:$PATH
 
 script:
   - emacs --version
