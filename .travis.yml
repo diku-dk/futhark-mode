@@ -13,19 +13,16 @@ addons:
       - sourceline: 'ppa:kelleyk/emacs'
     packages:
       - emacs25
-      - emacs26
 
 before_install:
-  - mkdir -p $HOME/emacs24 $HOME/emacs25 $HOME/emacs26
+  - mkdir -p $HOME/emacs24 $HOME/emacs25
   - ln -s $(which emacs24) $HOME/emacs24/emacs
   - ln -s $(which emacs25) $HOME/emacs25/emacs
-  - ln -s $(which emacs26) $HOME/emacs26/emacs
 
 matrix:
   include:
     - env: PATH=$HOME/emacs24:$PATH
     - env: PATH=$HOME/emacs25:$PATH
-    - env: PATH=$HOME/emacs26:$PATH
 
 script:
   - emacs --version
