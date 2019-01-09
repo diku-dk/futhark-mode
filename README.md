@@ -58,5 +58,6 @@ before each commit.
 Add the directory containing the `.el` files to your load path with
 
     (add-to-list 'load-path "/.../futhark-mode")
+    (require 'futhark-dev)
 
-and then enter `M-x RET futhark-mode-dev-reload RET` whenever needed.
+and then enter `M-x RET futhark-dev-reload RET` whenever needed.

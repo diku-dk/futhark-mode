@@ -96,30 +96,6 @@
   (setq-local font-lock-defaults '(futhark-highlight-font-lock))
   (futhark-indent-setup))
 
-(defun futhark-mode-dev-reload ()
-  "FOR DEVELOPMENT: Unload and re-require all of futhark-mode.
-Also reapply futhark-mode to all futhark-mode buffers."
-  (interactive)
-
-  (let ((futhark-mode-buffers
-         (cl-remove-if-not (lambda (buf)
-                             (with-current-buffer buf
-                               (eq major-mode 'futhark-mode)))
-                           (buffer-list))))
-
-    (ignore-errors (unload-feature 'futhark-mode t))
-    (ignore-errors (unload-feature 'futhark-highlight t))
-    (ignore-errors (unload-feature 'futhark-indent t))
-    (ignore-errors (unload-feature 'futhark-comint t))
-    (ignore-errors (unload-feature 'futhark-flycheck t))
-
-    (require 'futhark-mode)
-
-    (mapc (lambda (buf)
-            (with-current-buffer buf
-              (futhark-mode)))
-          futhark-mode-buffers)))
-
 (provide 'futhark-mode)
 
 ;;; futhark-mode.el ends here
