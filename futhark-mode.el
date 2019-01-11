@@ -40,7 +40,7 @@
 
 (defvar futhark-mode-map
   (let ((map (make-keymap)))
-    (define-key map "\C-c\C-l" 'futhark-comint-load-file)
+    (define-key map "\C-c\C-l" #'futhark-comint-load-file)
     map)
   "Keymap for `futhark-mode'.")
 
