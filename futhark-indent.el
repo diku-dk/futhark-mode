@@ -527,16 +527,6 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
            (futhark-indent-find-outer-module-1)) ; always use the
                                                  ; non-state-dependent variant
 
-          ;; If both the current and previous line is empty (at most
-          ;; whitespace), indent optimally w.r.t. top-level constructs, as it is
-          ;; likely one of those come next.
-          ((and (futhark-indent-is-empty-line)
-                (save-excursion
-                  (forward-line -1)
-                  (futhark-indent-is-empty-line)))
-           (let ((outer (futhark-indent-find-outer-module)))
-             (if outer (+ outer futhark-indent-level) 0)))
-
           ;; Indent a '}'-subsequent line relative to the '}' symbol.
           ((save-excursion
              (forward-line -1)
