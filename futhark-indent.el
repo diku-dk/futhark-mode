@@ -120,9 +120,6 @@ whitespace characters."
                  (forward-line 0)
                  (looking-at "[^{\n]*{[[:space:]]*$"))
                (futhark-indent-is-empty-line)
-               (save-excursion
-                 (forward-line 1)
-                 (futhark-indent-is-empty-line))
                (looking-at " ")))
       (let ((found (futhark-indent-forward-token-base)))
         (and (equal found "let")
@@ -149,10 +146,7 @@ whitespace characters."
                       (save-excursion
                         (forward-line 0)
                         (looking-at "[^{\n]*{[[:space:]]*$"))
-                      (futhark-indent-is-empty-line)
-                      (save-excursion
-                        (forward-line 1)
-                        (futhark-indent-is-empty-line))))
+                      (futhark-indent-is-empty-line)))
              (progn (goto-char (- let-point 2))
                     t)
              (looking-at " ")
@@ -164,39 +158,28 @@ whitespace characters."
 ;; non-comment line is blank, or if it is the first declaration inside a module,
 ;; then it is top-level (which is a pretty poor way of checking it).
 
+(defun futhark-indent-token-toplevel-let-common (found)
+  "Check if the token FOUND constitutes a toplevel let."
+  (and (equal found "let")
+       (let* ((outer (futhark-indent-find-outer-module))
+              (toplevel-indent (if outer (+ outer futhark-indent-level) 0))
+              (indent-space
+               (apply #'concat (mapcar (lambda (_) " ")
+                                       (number-sequence 1 toplevel-indent)))))
+         (save-excursion
+           (forward-line 0)
+           (looking-at (concat indent-space "let"))))))
+
 (defun futhark-indent-forward-token-toplevel-let ()
   "Find the next token."
   (let ((found (futhark-indent-forward-token-base)))
-    (when (and (equal found "let")
-               (or (save-excursion
-                     (forward-line -1)
-                     (or (futhark-indent-is-empty-line)
-                         (looking-at "[^{\n]*{[[:space:]]*$")))
-                   (save-excursion
-                     (futhark-indent-backward-token-base)
-                     (let ((line (line-number-at-pos)))
-                       (forward-comment (- (point)))
-                       (and (/= line (line-number-at-pos))
-                            (progn (forward-line 1) t)
-                            (futhark-indent-is-empty-line))))
-                   (= (line-number-at-pos (point)) 1)))
+    (when (futhark-indent-token-toplevel-let-common found)
       "toplevel-let")))
 
 (defun futhark-indent-backward-token-toplevel-let ()
   "Find the previous token."
   (let ((found (futhark-indent-backward-token-base)))
-    (when (and (equal found "let")
-               (or (save-excursion
-                     (forward-line -1)
-                     (or (futhark-indent-is-empty-line)
-                         (looking-at "[^{\n]*{[[:space:]]*$")))
-                   (save-excursion
-                     (let ((line (line-number-at-pos)))
-                       (forward-comment (- (point)))
-                       (and (/= line (line-number-at-pos))
-                            (progn (forward-line 1) t)
-                            (futhark-indent-is-empty-line))))
-                   (= (line-number-at-pos (point)) 1)))
+    (when (futhark-indent-token-toplevel-let-common found)
       "toplevel-let")))
 
 
@@ -239,8 +222,56 @@ Return its point."
 Return its point."
   (futhark-indent-first-token futhark-indent-forward-token forward-sexp))
 
+(defvar-local futhark-indent-state-current-outer-module nil
+  "Contains the current indentation needed for top-level elements.
+Is only used when indenting a region, and is always nil
+otherwise (to avoid using a state that has been invalidated by a
+change in the program).")
+
+(defun futhark-indent-state-current-outer-start ()
+  "Start the state keeping."
+  (let ((outer (futhark-indent-find-outer-module-1)))
+    (setq-local futhark-indent-state-current-outer-module
+                (or outer -2))))
+
+(defun futhark-indent-state-current-outer-stop ()
+  "Stop the state keeping."
+  (setq-local futhark-indent-state-current-outer-module nil))
+
+(defun futhark-indent-state-current-outer-enters ()
+  "Do we enter a module-like structure?"
+  (looking-at "[^{\n]*{"))
+
+(defun futhark-indent-state-current-outer-exits ()
+  "Do we exit a module-like structure?"
+  (looking-at "[^}\n]*}"))
+
+(defun futhark-indent-state-current-outer-update ()
+  "Update the state based on the current line."
+  (when futhark-indent-state-current-outer-module
+    (cond ((and (futhark-indent-state-current-outer-enters)
+                (futhark-indent-state-current-outer-exits))
+           t) ; ignore, since both { and } occur on the line
+          ((futhark-indent-state-current-outer-enters)
+           (setq-local futhark-indent-state-current-outer-module
+                       (+ futhark-indent-state-current-outer-module
+                          futhark-indent-level)))
+          ((futhark-indent-state-current-outer-exits)
+           (setq-local futhark-indent-state-current-outer-module
+                       (- futhark-indent-state-current-outer-module
+                          futhark-indent-level))))))
+
 (defun futhark-indent-find-outer-module ()
-  "Try to find the 'module' or 'open' enclosing the current code block."
+  "Try to find the 'module' or 'open' enclosing the current code block.
+Uses the `futhark-indent-state-current-outer-module' state as a
+lookup when indenting a region."
+  (if futhark-indent-state-current-outer-module
+      (if (< futhark-indent-state-current-outer-module 0) nil
+        futhark-indent-state-current-outer-module)
+    (futhark-indent-find-outer-module-1)))
+
+(defun futhark-indent-find-outer-module-1 ()
+  "The actual code."
   (save-excursion
     (ignore-errors (backward-up-list 1) t)
     (when (or (looking-at "{") (looking-at "("))
@@ -470,7 +501,8 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
           ;; Align closing '}' to 'module'/'open', and not directly to the
           ;; matching '{' (as SMIE would seemingly have it).
           ((looking-at "}")
-           (futhark-indent-find-outer-module))
+           (futhark-indent-find-outer-module-1)) ; always use the
+                                                 ; non-state-dependent variant
 
           ;; If both the current and previous line is empty (at most
           ;; whitespace), indent optimally w.r.t. top-level constructs, as it is
@@ -551,12 +583,29 @@ Puts an extra layer of hacks in front of SMIE."
     (or (futhark-indent-try futhark-indent-line-basic)
         (smie-indent-line))))
 
+(defun futhark-indent-line-with-state ()
+  "Indent the current line, and update the state as well.
+Used only for indenting regions, and only to make it go faster."
+  (futhark-indent-line)
+  (futhark-indent-state-current-outer-update))
+
+(defun futhark-indent-region (start end)
+  "Indent the region from START to END.
+This has the same semantics as running `futhark-indent-line'
+on each line, but contains optimisations to make it run faster."
+  (setq-local indent-line-function 'futhark-indent-line-with-state)
+  (futhark-indent-state-current-outer-start)
+  (indent-region-line-by-line start end)
+  (futhark-indent-state-current-outer-stop)
+  (setq-local indent-line-function 'futhark-indent-line))
+
 (defun futhark-indent-setup ()
   "Setup Emacs' Simple Minded Indentation Engine for Futhark."
   (smie-setup futhark-indent-grammar #'futhark-indent-rules
               :backward-token #'futhark-indent-backward-token
               :forward-token #'futhark-indent-forward-token)
-  (setq-local indent-line-function 'futhark-indent-line))
+  (setq-local indent-line-function 'futhark-indent-line)
+  (setq-local indent-region-function 'futhark-indent-region))
 
 (provide 'futhark-indent)
 
