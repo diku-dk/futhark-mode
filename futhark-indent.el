@@ -606,11 +606,14 @@ Used only for indenting regions, and only to make it go faster."
   "Indent the region from START to END.
 This has the same semantics as running `futhark-indent-line'
 on each line, but contains optimisations to make it run faster."
-  (setq-local indent-line-function 'futhark-indent-line-with-state)
   (futhark-indent-state-current-outer-start)
-  (indent-region-line-by-line start end)
-  (futhark-indent-state-current-outer-stop)
-  (setq-local indent-line-function 'futhark-indent-line))
+  (save-excursion
+    (goto-char start)
+    (while (< (point) end)
+      (or (and (bolp) (eolp))
+          (futhark-indent-line-with-state))
+      (forward-line 1)))
+  (futhark-indent-state-current-outer-stop))
 
 (defun futhark-indent-newline-and-indent ()
   "Do the same as `newline-and-indent', but work around top level let."
