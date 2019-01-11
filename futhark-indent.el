@@ -612,6 +612,24 @@ on each line, but contains optimisations to make it run faster."
   (futhark-indent-state-current-outer-stop)
   (setq-local indent-line-function 'futhark-indent-line))
 
+(defun futhark-indent-newline-and-indent ()
+  "Do the same as `newline-and-indent', but work around top level let."
+  (interactive "*")
+  (let ((current-indentation
+         (save-excursion
+           (forward-line 0)
+           (skip-chars-forward " \t")
+           (current-column))))
+    (delete-horizontal-space t)
+    (newline nil t)
+    ;; First use the same indentation as the previous line.  This works around
+    ;; the lexer, which will refuse to indent a 'let' that it considers
+    ;; top-level if its indentation is 0 (and it is not enclosed in a module).
+    (insert (apply #'concat (mapcar (lambda (_) " ")
+                                    (number-sequence 1 current-indentation))))
+    ;; Then just indent.
+    (indent-according-to-mode)))
+
 (defun futhark-indent-setup ()
   "Setup Emacs' Simple Minded Indentation Engine for Futhark."
   (smie-setup futhark-indent-grammar #'futhark-indent-rules
