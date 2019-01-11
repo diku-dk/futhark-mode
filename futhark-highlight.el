@@ -86,8 +86,15 @@ name)."
 (defconst futhark-highlight-operator
   (concat "\\(?:"
           (concat "["
+                  "-+*/%!<>&|@"
+                  "]")
+          "\\|"
+          (concat "["
                   "-+*/%!<>=&|@"
-                  "]" "+")
+                  "]"
+                  "["
+                  "-+*/%!<>=&|@"
+                  "]" "+") ; don't highlight '=', but do highlight '=='
           "\\|"
           "`[^`]*`"
           "\\)"))
@@ -136,7 +143,8 @@ name)."
       ;;; Lets.
       ;;;; Primitive values.
     (,(concat "let" futhark-highlight-ws1
-              "\\(" futhark-highlight-var "\\)")
+              "\\(" futhark-highlight-var "\\)"
+              futhark-highlight-ws "=")
      . '(1 font-lock-variable-name-face))
       ;;;; Tuples.  XXX: It would be nice to highlight only the variable names
       ;;;; inside the parantheses, and not also the commas.
@@ -184,15 +192,23 @@ name)."
     (,(futhark-highlight-syms-re futhark-highlight-builtin-types)
      . font-lock-type-face)
 
-    ;; Builtins.
-      ;;; Functions.
-      ;;;; Builtin functions.
+    ;; Functions.
+      ;;; Function definitions.
+    (,(concat "\\(?:"
+              "let"
+              "\\|"
+              "entry"
+              "\\)"
+              futhark-highlight-ws1
+              "\\(" futhark-highlight-var "\\)"
+              futhark-highlight-ws "[[(]")
+     . '(1 font-lock-function-name-face))
+      ;;; Builtins/prelude functions.
     (,(futhark-highlight-syms-re futhark-highlight-builtin-functions)
-     . font-lock-builtin-face)
+     . font-lock-function-name-face)
       ;;; Operators.
     (,futhark-highlight-operator
-     . font-lock-builtin-face)
-    )
+     . font-lock-function-name-face))
   "Highlighting expressions for Futhark.")
 
 (provide 'futhark-highlight)
