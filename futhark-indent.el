@@ -121,12 +121,13 @@ whitespace characters."
                  (looking-at "[^{\n]*{[[:space:]]*$"))
                (futhark-indent-is-empty-line)
                (looking-at " ")))
-      (let ((found (futhark-indent-forward-token-base)))
-        (and (equal found "let")
-             (progn (goto-char (- (point) 4))
-                    t)
-             (looking-at " ")
-             "in-implicit"))))
+      (unless (looking-at (futhark-indent-symbol "let"))
+        (let ((found (futhark-indent-forward-token-base)))
+          (and (equal found "let")
+               (progn (goto-char (- (point) 4))
+                      t)
+               (looking-at " ")
+               "in-implicit")))))
 
 (defun futhark-indent-backward-token-in-implicit ()
   "Find the previous token."
@@ -154,47 +155,48 @@ whitespace characters."
 
 
 ;; Lexer extension: Introduce a special token for when we believe 'let' to be a
-;; top-level 'let'.  We currently embed the heuristic that if the previous
-;; non-comment line is blank, or if it is the first declaration inside a module,
-;; then it is top-level (which is a pretty poor way of checking it).
+;; top-level 'let': If the 'let' has the indentation of a top-level declaration,
+;; it is a top-level let; in other words, the lexing depends on the current
+;; indentation.  We find the top-level indentation by searching backwards
+;; through the program for the nearest module/open block opener.
 
-(defun futhark-indent-token-toplevel-let-common (found)
-  "Check if the token FOUND constitutes a toplevel let."
+(defun futhark-indent-token-top-level-let-common (found)
+  "Check if the token FOUND constitutes a top level let."
   (and (equal found "let")
        (let* ((outer (futhark-indent-find-outer-module))
-              (toplevel-indent (if outer (+ outer futhark-indent-level) 0))
+              (top-level-indent (if outer (+ outer futhark-indent-level) 0))
               (indent-space
                (apply #'concat (mapcar (lambda (_) " ")
-                                       (number-sequence 1 toplevel-indent)))))
+                                       (number-sequence 1 top-level-indent)))))
          (save-excursion
            (forward-line 0)
            (looking-at (concat indent-space "let"))))))
 
-(defun futhark-indent-forward-token-toplevel-let ()
+(defun futhark-indent-forward-token-top-level-let ()
   "Find the next token."
   (let ((found (futhark-indent-forward-token-base)))
-    (when (futhark-indent-token-toplevel-let-common found)
-      "toplevel-let")))
+    (when (futhark-indent-token-top-level-let-common found)
+      "top-level-let")))
 
-(defun futhark-indent-backward-token-toplevel-let ()
+(defun futhark-indent-backward-token-top-level-let ()
   "Find the previous token."
   (let ((found (futhark-indent-backward-token-base)))
-    (when (futhark-indent-token-toplevel-let-common found)
-      "toplevel-let")))
+    (when (futhark-indent-token-top-level-let-common found)
+      "top-level-let")))
 
 
 (defun futhark-indent-forward-token ()
   "Find the next Futhark token, if any."
   (let ((start (point)))
     (or (futhark-indent-try futhark-indent-forward-token-in-implicit)
-        (futhark-indent-try futhark-indent-forward-token-toplevel-let)
+        (futhark-indent-try futhark-indent-forward-token-top-level-let)
         (futhark-indent-forward-token-base))))
 
 (defun futhark-indent-backward-token ()
   "Find the previous Futhark token, if any."
   (let ((start (point)))
     (or (futhark-indent-try futhark-indent-backward-token-in-implicit)
-        (futhark-indent-try futhark-indent-backward-token-toplevel-let)
+        (futhark-indent-try futhark-indent-backward-token-top-level-let)
         (futhark-indent-backward-token-base))))
 
 (defmacro futhark-indent-first-token (func-token func-sexp)
@@ -215,12 +217,32 @@ Return its point."
 (defun futhark-indent-first-backward-token (token)
   "Go to the first token TOKEN before the current position, if it exists.
 Return its point."
-  (futhark-indent-first-token futhark-indent-backward-token backward-sexp))
+  (futhark-indent-first-token futhark-indent-backward-token-base backward-sexp))
 
 (defun futhark-indent-first-forward-token (token)
   "Go to the first token TOKEN after the current position, if it exists.
 Return its point."
-  (futhark-indent-first-token futhark-indent-forward-token forward-sexp))
+  (futhark-indent-first-token futhark-indent-forward-token-base forward-sexp))
+
+(defun futhark-indent-first-backward-token-top-level-let ()
+  "Go to the first top-level-let token.
+This is an optimised variant
+of `(futhark-indent-first-backward-token \"top-level-let\")', and
+should be mostly the same."
+  (let* ((outer (futhark-indent-find-outer-module))
+         (top-level-indent (if outer (+ outer futhark-indent-level) 0)))
+    (save-excursion
+      (let ((cur (point))
+            (found nil))
+        (while (and cur (not found))
+          (let ((found-cur (futhark-indent-backward-token-base)))
+            (cond ((and (equal found-cur "let")
+                        (= (current-column) top-level-indent))
+                   (setq found t))
+                  ((equal found-cur "")
+                   (ignore-errors (backward-sexp 1) t))))
+          (setq cur (if (= (point) cur) nil (point))))
+        (when found (point))))))
 
 (defvar-local futhark-indent-state-current-outer-module nil
   "Contains the current indentation needed for top-level elements.
@@ -346,7 +368,7 @@ lookup when indenting a region."
        ;; openers/closers.  SMIE's operator precedence grammar engine gets less
        ;; confused this way.
        (decls (decls "entry" decls)
-              (decls "toplevel-let" decls)
+              (decls "top-level-let" decls)
               (decls "type" decls)
               (decls "val" decls)
               (decls "include" decls)
@@ -358,7 +380,8 @@ lookup when indenting a region."
      ;; Resolve conflicts (poorly): If more than one relation exists between two
      ;; tokens (i.e., a shift/reduce conflict), just collapse the relations into
      ;; a single '=' relation (i.e., shift).
-     '((assoc "entry" "toplevel-let" "type" "val" "include" "import" "module" "open" "local"))
+     '((assoc "entry" "top-level-let" "type" "val" "include"
+              "import" "module" "open" "local"))
      '((assoc "," "|" "case" "->"))
      )
 
@@ -395,7 +418,7 @@ lookup when indenting a region."
     (`(:after . "=")
      (unless (smie-rule-parent-p "loop")
        (let ((base (futhark-indent-max
-                    (futhark-indent-first-backward-token "toplevel-let")
+                    (futhark-indent-first-backward-token-top-level-let)
                     (futhark-indent-first-backward-token "let")
                     (futhark-indent-first-backward-token "entry"))))
          (when base
@@ -423,7 +446,7 @@ lookup when indenting a region."
     ;; Even when our heuristic has designated a 'let' as a top-level 'let', it
     ;; might still be wrong.  We disable auto-indentation and let the user
     ;; decide manually.
-    (`(:before . "toplevel-let")
+    (`(:before . "top-level-let")
      `(column . ,(current-column)))
 
     (`(:after . ,(or "then" "else" "do"))
@@ -564,7 +587,7 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
           (t
            (let ((cur (point))
                  (function-start (futhark-indent-max
-                                  (futhark-indent-first-backward-token "toplevel-let")
+                                  (futhark-indent-first-backward-token-top-level-let)
                                   (futhark-indent-first-backward-token "entry"))))
              (when function-start
                (save-excursion
@@ -604,6 +627,7 @@ on each line, but contains optimisations to make it run faster."
   (smie-setup futhark-indent-grammar #'futhark-indent-rules
               :backward-token #'futhark-indent-backward-token
               :forward-token #'futhark-indent-forward-token)
+  ;; Use more flexible indentation functions.
   (setq-local indent-line-function 'futhark-indent-line)
   (setq-local indent-region-function 'futhark-indent-region))
 
