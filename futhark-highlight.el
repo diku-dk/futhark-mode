@@ -146,6 +146,11 @@ name)."
               "\\(" futhark-highlight-var "\\)"
               futhark-highlight-ws "=")
      . '(1 font-lock-variable-name-face))
+      ;;;; In-place updates.
+    (,(concat "let" futhark-highlight-ws1
+              "\\(" futhark-highlight-var "\\)"
+              "\\[")
+     . '(1 font-lock-variable-name-face))
       ;;;; Tuples.  XXX: It would be nice to highlight only the variable names
       ;;;; inside the parantheses, and not also the commas.
     (,(concat "let" futhark-highlight-ws1 "("
@@ -201,7 +206,13 @@ name)."
               "\\)"
               futhark-highlight-ws1
               "\\(" futhark-highlight-var "\\)"
-              futhark-highlight-ws "[[(]")
+              futhark-highlight-ws
+              "\\(?:"
+              "\\[\\(?:[^]]\\)+\\]"
+              futhark-highlight-ws
+              "\\)" "*"
+              "("
+              )
      . '(1 font-lock-function-name-face))
       ;;; Builtins/prelude functions.
     (,(futhark-highlight-syms-re futhark-highlight-builtin-functions)

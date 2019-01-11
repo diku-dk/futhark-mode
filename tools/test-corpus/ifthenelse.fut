@@ -55,7 +55,7 @@ let foo () =
   else if x then z
   else 0
 
-let foo () =
+let foo [m] [n] () =
   if x
   then y
   else if x
