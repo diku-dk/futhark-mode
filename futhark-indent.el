@@ -667,8 +667,7 @@ on each line, but contains optimisations to make it run faster."
     ;; First use the same indentation as the previous line.  This works around
     ;; the lexer, which will refuse to indent a 'let' that it considers
     ;; top-level if its indentation is 0 (and it is not enclosed in a module).
-    (insert (apply #'concat (mapcar (lambda (_) " ")
-                                    (number-sequence 1 current-indentation))))
+    (indent-line-to current-indentation)
     ;; Then just indent.
     (indent-according-to-mode)))
 
