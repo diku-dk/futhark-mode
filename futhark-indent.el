@@ -567,10 +567,12 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
           ;; binding, that will also be indented correctly.
           ((and (futhark-indent-is-empty-line)
                 (save-excursion
-                  (forward-line -1)
-                  (member (futhark-indent-forward-token) '("in-implicit" "let")))
+                  (not (equal "=" (futhark-indent-backward-token))))
                 (save-excursion
-                  (not (equal "=" (futhark-indent-backward-token)))))
+                  (forward-line -1)
+                  (or (save-excursion
+                        (member (futhark-indent-forward-token) '("in-implicit" "let")))
+                      (futhark-indent-is-empty-line))))
            (futhark-indent-column-of (futhark-indent-first-backward-token "let")))
 
           ;; Do not auto-indent multi-line function parameters.
