@@ -609,9 +609,9 @@ on each line, but contains optimisations to make it run faster."
   (futhark-indent-state-current-outer-start)
   (save-excursion
     (goto-char start)
-    (while (< (point) end)
-      (or (and (bolp) (eolp))
-          (futhark-indent-line-with-state))
+    (while (and (< (point) end) (not (eobp)))
+      (unless (and (bolp) (eolp))
+        (futhark-indent-line-with-state))
       (forward-line 1)))
   (futhark-indent-state-current-outer-stop))
 
