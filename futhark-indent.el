@@ -578,6 +578,7 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
            (let ((cur (point))
                  (function-start (futhark-indent-max
                                   (futhark-indent-first-backward-token-top-level-let)
+                                  (futhark-indent-first-backward-token "let")
                                   (futhark-indent-first-backward-token "entry"))))
              (when function-start
                (save-excursion
