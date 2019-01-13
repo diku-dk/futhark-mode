@@ -1,4 +1,4 @@
-module A {
+module A = {
   type a = int
 
   include dog
@@ -8,7 +8,7 @@ module A {
   let main () : int = 0
 }
 
-module B {
+module B = {
   let f6 () =
     let x = 0 in
     let y =
