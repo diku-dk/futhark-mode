@@ -680,10 +680,7 @@ on each line, but contains optimisations to make it run faster."
               :forward-token #'futhark-indent-forward-token)
   ;; Use more flexible indentation functions.
   (setq-local indent-line-function #'futhark-indent-line)
-  (setq-local indent-region-function #'futhark-indent-region)
-  ;; Don't highlight matching keywords.  Our grammar is to weird for this to be
-  ;; useful.
-  (setq-local show-paren-mode nil))
+  (setq-local indent-region-function #'futhark-indent-region))
 
 (provide 'futhark-indent)
 
