@@ -585,7 +585,10 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
                   (or (save-excursion
                         (member (futhark-indent-forward-token) '("in-implicit" "let")))
                       (futhark-indent-is-empty-line))))
-           (futhark-indent-column-of (futhark-indent-first-backward-token "let")))
+           (or
+            (futhark-indent-column-of (futhark-indent-first-backward-token "let"))
+            (let ((c (futhark-indent-column-of (futhark-indent-first-backward-token ""))))
+              (when c (1- c)))))
 
           ;; Do not auto-indent multi-line function parameters.
           (t
