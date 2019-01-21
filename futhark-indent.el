@@ -215,12 +215,12 @@ Return its point."
       (when found (point)))))
 
 (defun futhark-indent-first-backward-token (token)
-  "Go to the first token TOKEN before the current position, if it exists.
+  "Find the first token TOKEN before the current position, if it exists.
 Return its point."
   (futhark-indent-first-token futhark-indent-backward-token-base backward-sexp))
 
 (defun futhark-indent-first-forward-token (token)
-  "Go to the first token TOKEN after the current position, if it exists.
+  "Find the first token TOKEN after the current position, if it exists.
 Return its point."
   (futhark-indent-first-token futhark-indent-forward-token-base forward-sexp))
 
@@ -243,6 +243,18 @@ should be mostly the same."
                    (ignore-errors (backward-sexp 1) t))))
           (setq cur (if (= (point) cur) nil (point))))
         (when found (point))))))
+
+(defun futhark-indent-first-backward-token-local (token)
+  "Find the first TOKEN before the current position, or 'local'.
+If the token just prior to the found token is 'local', return the
+position of that instead."
+  (let ((pos (futhark-indent-first-backward-token token)))
+    (when pos
+      (save-excursion
+        (goto-char pos)
+        (if (equal (futhark-indent-backward-token) "local")
+            (point)
+          pos)))))
 
 (defvar-local futhark-indent-state-current-outer-module nil
   "Contains the current indentation needed for top-level elements.
@@ -298,8 +310,8 @@ lookup when indenting a region."
     (ignore-errors (backward-up-list 1) t)
     (when (or (looking-at "{") (looking-at "("))
       (futhark-indent-max
-       (futhark-indent-column-of (futhark-indent-first-backward-token "module"))
-       (futhark-indent-column-of (futhark-indent-first-backward-token "open"))
+       (futhark-indent-column-of (futhark-indent-first-backward-token-local "module"))
+       (futhark-indent-column-of (futhark-indent-first-backward-token-local "open"))
 
        ;; We need to go two levels up in case of functors like
        ;;
@@ -308,8 +320,8 @@ lookup when indenting a region."
         (equal (futhark-indent-backward-token) "")
         (ignore-errors (backward-up-list 1) t)
         (futhark-indent-max
-         (futhark-indent-column-of (futhark-indent-first-backward-token "module"))
-         (futhark-indent-column-of (futhark-indent-first-backward-token "open"))))))))
+         (futhark-indent-column-of (futhark-indent-first-backward-token-local "module"))
+         (futhark-indent-column-of (futhark-indent-first-backward-token-local "open"))))))))
 
 
 ;;; Grammar for the SMIE parser:

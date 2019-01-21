@@ -23,3 +23,7 @@ module C = {
   open (F R)
   open B
 }
+
+local module D = {
+  open import "test"
+}
