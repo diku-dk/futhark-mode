@@ -30,9 +30,9 @@ Do not put command line options here; they go in `futhark-comint-interpreter-arg
   :type '(repeat string) :group 'futhark)
 
 (defvar futhark-comint-prompt-regexp "^\\(?:\\[[0-9]+\\]\\)"
-  "Prompt for `futhark-comint-run'.")
+  "Prompt for `run-futhark'.")
 
-(defun futhark-comint-run ()
+(defun run-futhark ()
   "Run an inferior instance of `futharki' inside Emacs."
   (interactive)
   (pop-to-buffer
@@ -46,7 +46,7 @@ Do not put command line options here; they go in `futhark-comint-interpreter-arg
   "Keymap for `futhark-comint-mode'.")
 
 (define-derived-mode futhark-comint-mode comint-mode "futharki"
-  "Major mode for `futhark-comint-run'.
+  "Major mode for `run-futhark'.
 
 \\<futhark-comint-mode-map>"
   nil "futhark"
@@ -60,7 +60,7 @@ Do not put command line options here; they go in `futhark-comint-interpreter-arg
   "Load FILE into the futharki process.
 FILE is the file visited by the current buffer.
 
-Automatically starts an inferior futharki process with `futhark-comint-run`
+Automatically starts an inferior futharki process with `run-futhark`
 if a running futharki instance cannot be found."
   (interactive
    (list (or buffer-file-name
@@ -73,7 +73,7 @@ if a running futharki instance cannot be found."
          (with-current-buffer b
            (apply comint-input-sender (list p (concat ":load " file))))
          (pop-to-buffer b))
-      (futhark-comint-run)
+      (run-futhark)
       (futhark-comint-load-file file))))
 
 (provide 'futhark-comint)
