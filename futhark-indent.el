@@ -605,14 +605,19 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
                               (< cur first-eq))
                      cur-col)))))))))
     (when indent
-      (progn (indent-line-to indent) t))))
+      (progn (indent-line-to indent)
+             t))))
 
 (defun futhark-indent-line-base ()
   "Indent the current line.
 Puts an extra layer of hacks in front of SMIE."
-  (let ((start (point)))
-    (or (futhark-indent-try futhark-indent-line-basic)
-        (smie-indent-line))))
+  (let ((doit (lambda ()
+                (let ((start (point)))
+                 (or (futhark-indent-try futhark-indent-line-basic)
+                     (smie-indent-line))))))
+    (if (looking-back "^\\w*")
+        (funcall doit)
+        (save-excursion (funcall doit)))))
 
 (defun futhark-indent-line-cycle-let ()
   "If looking at 'let', cycle between the valid indentations.
