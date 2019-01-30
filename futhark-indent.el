@@ -588,7 +588,7 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
            (or
             (futhark-indent-column-of (futhark-indent-first-backward-token "let"))
             (let ((c (futhark-indent-column-of (futhark-indent-first-backward-token ""))))
-              (when c (1- c)))))
+              (when c (max 0 (1- c))))))
 
           ;; Do not auto-indent multi-line function parameters.
           (t
