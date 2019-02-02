@@ -36,7 +36,7 @@ Do not put command line options here; they go in `futhark-comint-interpreter-arg
   "Run an inferior instance of `futharki' inside Emacs."
   (interactive)
   (pop-to-buffer
-   (apply 'make-comint "futharki" futhark-comint-interpreter-name futhark-comint-interpreter-args))
+   (apply 'make-comint "futhark" futhark-comint-interpreter-name futhark-comint-interpreter-args))
   (futhark-comint-mode))
 
 (defvar futhark-comint-mode-map
@@ -45,7 +45,7 @@ Do not put command line options here; they go in `futhark-comint-interpreter-arg
     map)
   "Keymap for `futhark-comint-mode'.")
 
-(define-derived-mode futhark-comint-mode comint-mode "futharki"
+(define-derived-mode futhark-comint-mode comint-mode "futhark"
   "Major mode for `run-futhark'.
 
 \\<futhark-comint-mode-map>"
@@ -66,8 +66,8 @@ if a running futharki instance cannot be found."
    (list (or buffer-file-name
              (read-file-name "File to load: " nil nil t))))
   (comint-check-source file)
-  (let ((b (get-buffer "*futharki*"))
-        (p (get-process "futharki")))
+  (let ((b (get-buffer "*futhark*"))
+        (p (get-process "futhark")))
     (if (and b p)
         (progn
          (with-current-buffer b
