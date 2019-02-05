@@ -161,6 +161,10 @@ name)."
      . '(1 font-lock-variable-name-face))
 
     ;; Constants.
+      ;;; Constructors
+    (,(concat "\\(" futhark-highlight-constructor "\\)")
+     . font-lock-constant-face)
+
       ;;; Booleans.
     (,(futhark-highlight-syms-re futhark-highlight-booleans)
      . font-lock-constant-face)
@@ -171,10 +175,6 @@ name)."
 
       ;;; Characters
     (,(concat "\\(" futhark-highlight-character "\\)")
-     . font-lock-constant-face)
-
-      ;;; Constructors
-    (,(concat "\\(" futhark-highlight-constructor "\\)")
      . font-lock-constant-face)
 
     ;; Keywords.
