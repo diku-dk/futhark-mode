@@ -86,15 +86,15 @@ name)."
 (defconst futhark-highlight-operator
   (concat "\\(?:"
           (concat "["
-                  "-+*/%!<>&|@"
-                  "]")
-          "\\|"
-          (concat "["
                   "-+*/%!<>=&|@"
                   "]"
                   "["
                   "-+*/%!<>=&|@"
                   "]" "+") ; don't highlight '=', but do highlight '=='
+          "\\|"
+          (concat "["
+                  "-+*/%!<>&|@"
+                  "]")
           "\\|"
           "`[^`]*`"
           "\\)"))
