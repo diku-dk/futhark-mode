@@ -304,10 +304,18 @@ lookup when indenting a region."
         futhark-indent-state-current-outer-module)
     (futhark-indent-find-outer-module-1)))
 
+(defmacro with-basic-forward-sexp (code)
+  "Run CODE with the default `forward-sexp' implementation.
+Assumes CODE does not error."
+  `(let ((cur-forward-sexp forward-sexp-function))
+     (setq-local forward-sexp-function nil)
+     ,code
+     (setq-local forward-sexp-function cur-forward-sexp)))
+
 (defun futhark-indent-find-outer-module-1 ()
   "The actual code."
   (save-excursion
-    (ignore-errors (backward-up-list 1) t)
+    (with-basic-forward-sexp (ignore-errors (backward-up-list 1) t))
     (when (or (looking-at "{") (looking-at "("))
       (futhark-indent-max
        (futhark-indent-column-of (futhark-indent-first-backward-token-local "module"))
@@ -317,8 +325,8 @@ lookup when indenting a region."
        ;;
        ;;   module foo = bar({ ... })
        (and
-        (equal (futhark-indent-backward-token) "")
-        (ignore-errors (backward-up-list 1) t)
+        (equal (futhark-indent-backward-token-base) "")
+        (with-basic-forward-sexp (ignore-errors (backward-up-list 1) t))
         (futhark-indent-max
          (futhark-indent-column-of (futhark-indent-first-backward-token-local "module"))
          (futhark-indent-column-of (futhark-indent-first-backward-token-local "open"))))))))
