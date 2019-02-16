@@ -547,10 +547,13 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
            (futhark-indent-find-outer-module-1)) ; always use the
                                                  ; non-state-dependent variant
 
-          ;; Indent a '}'-subsequent line relative to the '}' symbol.
-          ((save-excursion
-             (forward-line -1)
-             (looking-at "[[:space:]]*}[[:space:]]*$"))
+          ;; Indent a '}'-subsequent line relative to the '}' symbol, unless it
+          ;; is probably part of a record and not a module.
+          ((and
+            (not (or (looking-at ",") (looking-at ")") (looking-at "]")))
+            (save-excursion
+              (forward-line -1)
+              (looking-at "[[:space:]]*}[[:space:]]*$")))
            (save-excursion
              (forward-line -1)
              (skip-syntax-forward " \t")
