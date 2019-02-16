@@ -211,7 +211,12 @@ name)."
               "\\[\\(?:[^]]\\)+\\]"
               futhark-highlight-ws
               "\\)" "*"
+              "\\(?:"
               "("
+              "\\|"
+              futhark-highlight-ws1
+              "[^=]"
+              "\\)"
               )
      . '(1 font-lock-function-name-face))
       ;;; Builtins/prelude functions.
