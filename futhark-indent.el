@@ -559,12 +559,21 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
              (skip-syntax-forward " \t")
              (current-column)))
 
+          ;; Align to previous line if that is a comment.
+          ((save-excursion
+             (forward-line -1)
+             (skip-syntax-forward " \t")
+             (looking-at comment-start))
+           (save-excursion
+             (forward-line -1)
+             (skip-syntax-forward " \t")
+             (current-column)))
+
           ;; Align comment to next non-comment line.
           ((looking-at comment-start)
            (save-excursion
              (forward-comment (count-lines (point-min) (point)))
-             (current-column))
-           )
+             (current-column)))
 
           ;; Work around the limitations of the 'in-implicit' token: If the user
           ;; has (temporarily) removed all indentation in front of a 'let'
