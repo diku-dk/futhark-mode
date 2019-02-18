@@ -566,6 +566,13 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
              (skip-syntax-forward " \t")
              (current-column)))
 
+          ;; Emacs 24 (and the accompanying SMIE) subtly fail at indenting a ']'
+          ;; directly below the matching '['.
+          ((looking-at "]")
+           (save-excursion
+             (backward-up-list 1)
+             (current-column)))
+
           ;; Align to previous line if that is a comment.
           ((save-excursion
              (forward-line -1)
