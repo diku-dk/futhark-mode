@@ -382,6 +382,7 @@ Assumes CODE does not error."
             ("loop" pat "while" exp "do" exp)
             ("loop" pat "=" exp "while" exp "do" exp)
             ("match" exp "case" match-cases)
+            ("with") ; this is good enough
             )
 
        ;; We describe the declarations in terms of separators, not
@@ -503,6 +504,12 @@ Assumes CODE does not error."
               (futhark-indent-backward-token)
               (futhark-indent-backward-token)
               `(column . ,(+ (current-column) futhark-indent-level))))))
+
+    (`(:before . "with")
+     (and
+      (smie-rule-bolp)
+      (let ((prevp (futhark-indent-first-backward-token "with")))
+        (and prevp `(column . ,(futhark-indent-column-of prevp))))))
 
     (`(:before . "if")
      (and
