@@ -36,7 +36,7 @@ Do not put command line options here; they go in `futhark-comint-interpreter-arg
   "Run an inferior instance of `futharki' inside Emacs."
   (interactive)
   (pop-to-buffer
-   (apply 'make-comint "futhark" futhark-comint-interpreter-name futhark-comint-interpreter-args))
+   (apply 'make-comint "futhark" futhark-comint-interpreter-name nil futhark-comint-interpreter-args))
   (futhark-comint-mode))
 
 (defvar futhark-comint-mode-map
