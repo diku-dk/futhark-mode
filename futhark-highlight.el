@@ -33,13 +33,6 @@ name)."
     "unsafe" "include" "import" "module" "open" "local" "assert")
   "All Futhark keywords.")
 
-(defconst futhark-highlight-builtin-functions
-  '("zip" "unzip" "map" "reduce"
-    "reduce_comm" "scan" "filter" "partition" "scatter" "stream_map"
-    "stream_map_per" "stream_red" "stream_map_per" "stream_seq"
-    "reduce_by_index")
-  "All Futhark builtin SOACs, functions, and non-symbolic operators.")
-
 (defconst futhark-highlight-numeric-types
   '("i8" "i16" "i32" "i64"
     "u8" "u16" "u32" "u64"
@@ -219,9 +212,6 @@ name)."
               "\\)"
               )
      . '(1 font-lock-function-name-face))
-      ;;; Builtins/prelude functions.
-    (,(futhark-highlight-syms-re futhark-highlight-builtin-functions)
-     . font-lock-function-name-face)
       ;;; Operators.
     (,futhark-highlight-operator
      . font-lock-function-name-face))
