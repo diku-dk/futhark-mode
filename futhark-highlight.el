@@ -150,7 +150,7 @@ name)."
               "\\(" "[^)]+" "\\)")
      . '(1 font-lock-variable-name-face))
       ;;; Function parameters.
-    (,(concat "\\(" futhark-highlight-var "\\)" futhark-highlight-ws ":")
+    (,(concat "\\(" futhark-highlight-var "\\)" ":")
      . '(1 font-lock-variable-name-face))
 
     ;; Constants.
