@@ -101,10 +101,12 @@ name)."
           ""
           "\\|"
           futhark-highlight-var
+          "\\(?:" "\\." futhark-highlight-var "\\)" "?"
           "\\)"
           "\\]"
           "\\)" "*"
           futhark-highlight-var
+          "\\(?:" "\\." futhark-highlight-var "\\)" "?"
           "\\)"
           )
   "A regex describing a Futhark type which is not a tuple.")
@@ -179,16 +181,17 @@ name)."
      . font-lock-keyword-face)
 
     ;; Types.
-      ;;; Type aliases.  XXX: It would be nice to highlight also the right hand
-      ;;; side.
+    ;;; Type aliases.  XXX: It would be nice to highlight also the right hand
+    ;;; side.
     (,(concat "type" futhark-highlight-ws1 "\\(" futhark-highlight-type "\\)")
-     . '(1 font-lock-type-face))
-      ;;; Function parameters types and return type.
-    (,(concat ":" futhark-highlight-ws "\\(" futhark-highlight-type "\\)")
      . '(1 font-lock-type-face))
       ;;; Builtin types.
     (,(futhark-highlight-syms-re futhark-highlight-builtin-types)
      . font-lock-type-face)
+
+    ;; Modules
+    (,(concat "module" futhark-highlight-ws1 "\\(" futhark-highlight-var "\\)")
+     . '(1 font-lock-type-face))
 
     ;; Functions.
       ;;; Function definitions.
