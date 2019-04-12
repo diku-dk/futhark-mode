@@ -184,6 +184,8 @@ name)."
     (,(concat "type" futhark-highlight-ws1 "\\(" futhark-highlight-type "\\)")
      . '(1 font-lock-type-face))
       ;;; Function parameters types and return type.
+    (,(concat ":" futhark-highlight-ws "\\(" futhark-highlight-type "\\)")
+     . '(1 font-lock-type-face))
       ;;; Builtin types.
     (,(futhark-highlight-syms-re futhark-highlight-builtin-types)
      . font-lock-type-face)
