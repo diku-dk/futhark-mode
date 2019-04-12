@@ -69,7 +69,7 @@ name)."
   (concat "'[^']?'"))
 
 (defconst futhark-highlight-var
-  (concat "\\(?:" "[_'[:alnum:]]+" "\\)")
+  (concat "\\(?:" "[_[:alpha:]][_'[:alnum:]]+" "\\)")
   "A regex describing a Futhark variable.")
 
 (defconst futhark-highlight-constructor
