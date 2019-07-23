@@ -535,10 +535,9 @@ Assumes CODE does not error."
        (when p `(column . ,(futhark-indent-column-of p)))))
 
     (`(:before . "case")
-     `(column . ,(futhark-indent-max (futhark-indent-column-of
-                                    (futhark-indent-first-backward-token "match"))
-                                   (futhark-indent-column-of
-                                    (futhark-indent-first-backward-token "case")))))))
+     `(column . ,(futhark-indent-column-of
+                  (futhark-indent-max (futhark-indent-first-backward-token "match")
+                                      (futhark-indent-first-backward-token "case")))))))
 
 (defun futhark-indent-line-basic ()
   "Try to indent the current line.
