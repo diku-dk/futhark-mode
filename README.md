@@ -6,7 +6,7 @@ See the file `futhark-mode.el`.  This Emacs mode provides:
 
   * syntax highlighting
   * automatic indentation
-  * interaction with an inferior `futharki` process
+  * interaction with an inferior `futhark repl` process
   * flycheck definition
 
 ## Installation
@@ -24,7 +24,7 @@ This mode is pretty straightforward and does not provide a lot of
 bells and whistles.  But it does have some commands:
 
   * **C-c C-l** (`futhark-load-file`) loads the current file into
-    `futharki`, creating a new instance if a current one does not
+    `futhark repl`, creating a new instance if a current one does not
     exist.
 
 Also consider `M-x flycheck-mode` to get immediate information about
