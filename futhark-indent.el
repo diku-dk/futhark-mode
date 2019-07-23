@@ -427,6 +427,11 @@ Assumes CODE does not error."
 
 (defun futhark-indent-rules (kind token)
   "The SMIE rules for indentation.  See SMIE documentation for info on KIND and TOKEN."
+  ;; Uncomment this for convenient debugging.  Note that SMIE will
+  ;; call this function several times as it tries to hazily figure out
+  ;; what is going on, so keep your *Messages* buffer handy.
+  ;;
+  ;; (message "%S" (cons kind token))
   (pcase (cons kind token)
     (`(:elem . basic) futhark-indent-level)
     (`(:elem . args) 0)
@@ -441,7 +446,8 @@ Assumes CODE does not error."
        (let ((base (futhark-indent-max
                     (futhark-indent-first-backward-token-top-level-let)
                     (futhark-indent-first-backward-token "let")
-                    (futhark-indent-first-backward-token "entry"))))
+                    (futhark-indent-first-backward-token "entry")
+                    (futhark-indent-first-backward-token "type"))))
          (when base
            ;; In the case of 'local let ...' lines, indent relative to 'local',
            ;; not 'let'.
