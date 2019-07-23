@@ -535,8 +535,8 @@ Assumes CODE does not error."
 
     (`(:before . "|") ; in type constructor definitions
      (let ((p (and (smie-rule-bolp)
-                   (progn (futhark-indent-backward-token)
-                          (looking-at "#"))
+                   (progn (futhark-indent-forward-token)
+                          (looking-at " *#"))
                    (futhark-indent-first-backward-token "="))))
        (when p `(column . ,(futhark-indent-column-of p)))))
 
