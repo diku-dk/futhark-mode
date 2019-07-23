@@ -647,18 +647,11 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
       (progn (indent-line-to indent)
              t))))
 
-(defun futhark-indent-line-base (cursor-move)
-  "Indent the current line.  CURSOR-MOVE should be either 'detect or 'keep.
-Puts an extra layer of hacks in front of SMIE."
-  (let ((doit (lambda ()
-                (let ((start (point)))
-                 (or (futhark-indent-try futhark-indent-line-basic)
-                     (smie-indent-line)))))
-        (cursor-keep (or (eq cursor-move 'keep)
-                         (looking-back "^\\w*"))))
-    (if cursor-keep
-        (funcall doit)
-      (save-excursion (funcall doit)))))
+(defun futhark-indent-line-base ()
+  "Indent the current line."
+  (let ((start (point)))
+    (or (futhark-indent-try futhark-indent-line-basic)
+        (smie-indent-line))))
 
 (defun futhark-indent-line-cycle-let ()
   "If looking at 'let', cycle between the valid indentations.
@@ -679,7 +672,7 @@ a new top level definition."
         (cond (; is indented as a top-level let; try to force indent as a normal let
                (= let-indent top-level-indent)
                (indent-line-to 1)
-               (futhark-indent-line-base 'detect))
+               (futhark-indent-line-base))
               (t ; vice versa
                (indent-line-to top-level-indent)))))))
 
@@ -696,12 +689,12 @@ indentations for the line, if multiple exist."
   (cond ((eq last-command 'indent-for-tab-command)
          (futhark-indent-line-cycle))
         (t
-         (futhark-indent-line-base 'detect))))
+         (futhark-indent-line-base))))
 
 (defun futhark-indent-line-with-state ()
   "Indent the current line, and update the state as well.
 Used only for indenting regions, and only to make it go faster."
-  (futhark-indent-line-base 'detect)
+  (futhark-indent-line-base)
   (futhark-indent-state-current-outer-update))
 
 (defun futhark-indent-region (start end)
@@ -732,7 +725,7 @@ on each line, but contains optimisations to make it run faster."
     ;; top-level if its indentation is 0 (and it is not enclosed in a module).
     (indent-line-to current-indentation)
     ;; Then just indent.
-    (futhark-indent-line-base 'keep)))
+    (futhark-indent-line-base)))
 
 (defun futhark-indent-setup ()
   "Setup Emacs' Simple Minded Indentation Engine for Futhark."
