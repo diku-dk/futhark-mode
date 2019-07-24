@@ -23,7 +23,7 @@
   (flycheck-define-checker futhark
     "A Futhark syntax and type checker.
 See URL `https://github.com/diku-dk/futhark'."
-    :command ("futhark" "-t" source-inplace)
+    :command ("futhark" "check" source-inplace)
     :modes 'futhark-mode
     :error-patterns
     ((error line-start "Error at " (file-name) ":" line ":" column "-"
