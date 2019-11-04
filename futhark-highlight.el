@@ -165,9 +165,7 @@ name)."
      . font-lock-constant-face)
 
       ;;; Numbers
-      ;;;
-      ;;; There is a hack here to avoid seeing a number in foo_2.
-    (,(concat "\\(?:[^_]\\|^\\)\\(" futhark-highlight-number "\\)")
+    (,(concat "\\(" futhark-highlight-number "\\)")
      . font-lock-constant-face)
 
       ;;; Characters
