@@ -35,10 +35,14 @@
                    (with-current-buffer
                        standard-output
                      (apply 'call-process "futhark" nil t nil args)))))
-    (list (cons 'name (futhark-get-info-field "Name" output))
-          (cons 'position (futhark-get-info-field "Position" output))
-          (cons 'definition (futhark-get-info-field "Definition" output))
-          (cons 'type (futhark-get-info-field "Type" output)))))
+    (let ((name (futhark-get-info-field "Name" output))
+          (position (futhark-get-info-field "Position" output))
+          (definition (futhark-get-info-field "Definition" output))
+          (type (futhark-get-info-field "Type" output)))
+     (append (when name (cons 'name name))
+             (when position (cons 'position position))
+             (when definition (cons 'definition definition))
+             (when type (cons 'type type))))))
 
 ;;; Go to definition;
 ;;
