@@ -39,10 +39,10 @@
           (position (futhark-get-info-field "Position" output))
           (definition (futhark-get-info-field "Definition" output))
           (type (futhark-get-info-field "Type" output)))
-     (append (when name (cons 'name name))
-             (when position (cons 'position position))
-             (when definition (cons 'definition definition))
-             (when type (cons 'type type))))))
+     (append (when name (list (cons 'name name)))
+             (when position (list (cons 'position position)))
+             (when definition (list (cons 'definition definition)))
+             (when type (list (cons 'type type)))))))
 
 ;;; Go to definition;
 ;;
