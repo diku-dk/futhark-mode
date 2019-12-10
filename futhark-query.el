@@ -27,8 +27,14 @@
   (let* ((pos (or pos (point)))
          (line (line-number-at-pos pos))
          (col (save-excursion (goto-char pos) (1+ (current-column))))
-         (command (format "futhark query %s %d %d" (buffer-file-name) line col))
-         (output (shell-command-to-string command)))
+         (args (list "query"
+                     (buffer-file-name)
+                     (number-to-string line)
+                     (number-to-string col)))
+         (output (with-output-to-string
+                   (with-current-buffer
+                       standard-output
+                     (apply 'call-process "futhark" nil t nil args)))))
     (list (cons 'name (futhark-get-info-field "Name" output))
           (cons 'position (futhark-get-info-field "Position" output))
           (cons 'definition (futhark-get-info-field "Definition" output))
@@ -67,7 +73,7 @@
             (line (string-to-number (match-string 2 def)))
             (col (1- (string-to-number (match-string 3 def)))))
         (if (string-match "^/futlib/" file)
-            (message "%s has a built-in definition" (cdr (assoc 'name info)))
+            (message "%s is a built-in" (cdr (assoc 'name info)))
           (find-file file)
           (goto-line line)
           (move-beginning-of-line nil)
