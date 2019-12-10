@@ -8,6 +8,8 @@ See the file `futhark-mode.el`.  This Emacs mode provides:
   * automatic indentation
   * interaction with an inferior `futhark repl` process
   * flycheck definition
+  * ElDoc support
+  * jumping to definition of function or variable at point
 
 ## Installation
 
@@ -26,6 +28,9 @@ bells and whistles.  But it does have some commands:
   * **C-c C-l** (`futhark-load-file`) loads the current file into
     `futhark repl`, creating a new instance if a current one does not
     exist.
+
+  * **M-.** jumps to the definition of the function or variable under
+    point, and **M-,** returns from the definition.
 
 Also consider `M-x flycheck-mode` to get immediate information about
 type- and syntax errors (requires installation of the `flycheck` Emacs

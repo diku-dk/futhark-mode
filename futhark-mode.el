@@ -30,6 +30,8 @@
 (require 'futhark-indent)
 (require 'futhark-comint)
 (require 'futhark-flycheck)
+(require 'futhark-query)
+(require 'futhark-eldoc)
 
 (defgroup futhark ()
   "Editing Futhark source files."
@@ -42,6 +44,8 @@
   (let ((map (make-keymap)))
     (define-key map "\C-c\C-l" #'futhark-comint-load-file)
     (define-key map (kbd "RET") #'futhark-indent-newline-and-indent)
+    (define-key map (kbd "M-.") #'futhark-go-to-definition)
+    (define-key map (kbd "M-,") #'futhark-return-from-definition)
     map)
   "Keymap for `futhark-mode'.")
 
@@ -95,6 +99,8 @@
   (setq-local paragraph-separate (concat " *-- ==$\\|[ \t]*$\\|" page-delimiter))
   (setq-local comment-padding " ")
   (setq-local font-lock-defaults '(futhark-highlight-font-lock))
+  (set (make-local-variable 'eldoc-documentation-function)
+       'futhark-eldoc-function)
   (futhark-indent-setup))
 
 (provide 'futhark-mode)
