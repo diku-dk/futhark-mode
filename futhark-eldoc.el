@@ -17,23 +17,6 @@
 
 ;;; Code:
 
-(defun futhark-get-info-field (field string)
-  (when (string-match (format "^%s: \\(.*\\)$" (regexp-quote field)) string)
-    (match-string 1 string)))
-
-(defun futhark-lookup-info-at-point (&optional pos)
-  (unless (buffer-file-name)
-    (error "Buffer is not associated with a file"))
-  (let* ((pos (or pos (point)))
-         (line (line-number-at-pos pos))
-         (col (save-excursion (goto-char pos) (1+ (current-column))))
-         (command (format "futhark query %s %d %d" (buffer-file-name) line col))
-         (output (shell-command-to-string command)))
-    (list (cons 'name (futhark-get-info-field "Name" output))
-          (cons 'position (futhark-get-info-field "Position" output))
-          (cons 'definition (futhark-get-info-field "Definition" output))
-          (cons 'type (futhark-get-info-field "Type" output)))))
-
 (defun futhark-eldoc-function ()
   (let* ((info (futhark-lookup-info-at-point))
          (name (cdr (assoc 'name info)))
