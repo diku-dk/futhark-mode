@@ -155,6 +155,11 @@ name)."
     (,(concat "\\(" futhark-highlight-var "\\)" ":")
      . '(1 font-lock-variable-name-face))
 
+      ;;; Value specs.
+    (,(concat "val" futhark-highlight-ws1
+              "\\(" futhark-highlight-var "\\)")
+     . '(1 font-lock-variable-name-face))
+
     ;; Constants.
       ;;; Constructors
     (,(concat "\\(" futhark-highlight-constructor "\\)")
