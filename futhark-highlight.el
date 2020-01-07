@@ -188,7 +188,7 @@ name)."
     ;; Types.
     ;;; Type aliases.  XXX: It would be nice to highlight also the right hand
     ;;; side.
-    (,(concat "type" futhark-highlight-ws1 "\\(" futhark-highlight-type "\\)")
+    (,(concat "type^?" futhark-highlight-ws1 "\\(" futhark-highlight-type "\\)")
      . '(1 font-lock-type-face))
       ;;; Builtin types.
     (,(futhark-highlight-syms-re futhark-highlight-builtin-types)
