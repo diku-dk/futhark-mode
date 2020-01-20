@@ -135,6 +135,12 @@ name)."
   `(
 
     ;; Variable and tuple declarations.
+
+      ;;; Value specs.
+    (,(concat "val" futhark-highlight-ws1
+              "\\(" futhark-highlight-var "\\)")
+     . '(1 font-lock-function-name-face))
+
       ;;; Lets.
       ;;;; Primitive values.
     (,(concat "let" futhark-highlight-ws1
@@ -153,11 +159,6 @@ name)."
      . '(1 font-lock-variable-name-face))
       ;;; Function parameters.
     (,(concat "\\(" futhark-highlight-var "\\)" ":")
-     . '(1 font-lock-variable-name-face))
-
-      ;;; Value specs.
-    (,(concat "val" futhark-highlight-ws1
-              "\\(" futhark-highlight-var "\\)")
      . '(1 font-lock-variable-name-face))
 
     ;; Constants.
