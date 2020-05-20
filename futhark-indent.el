@@ -342,6 +342,7 @@ Assumes CODE does not error."
     (smie-bnf->prec2
      '(
        (id)
+       (attr ("#[" exp "]"))
        (types (type)
               (type "," type))
        (type (id)
@@ -364,6 +365,7 @@ Assumes CODE does not error."
        (record-assignments (record-assignment)
                            (record-assignment "," record-assignment))
        (exp (id)
+            (attr)
             ("[" exps "]")
             ("{" record-assignments "}")
             ("unsafe" exp)
@@ -487,6 +489,15 @@ Assumes CODE does not error."
     (`(:before . ",")
      (when (smie-rule-bolp)
        (smie-rule-parent)))
+
+    (`(:after . "]") ; attributes
+     (save-excursion
+       (ignore-errors (forward-char))
+       (ignore-errors (backward-sexp))
+       (ignore-errors (backward-char))
+       (message "%c" (char-after))
+       (when (looking-at "#")
+         `(column . ,(current-column)))))
 
     (`(:after . ":") ; functors
      (smie-rule-parent futhark-indent-level))

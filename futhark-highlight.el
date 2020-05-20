@@ -30,7 +30,7 @@ name)."
 (defconst futhark-highlight-keywords
   '("if" "then" "else" "let" "loop" "in" "with" "type"
     "val" "entry" "for" "while" "do" "case" "match"
-    "unsafe" "include" "import" "module" "open" "local" "assert")
+    "include" "import" "module" "open" "local" "assert")
   "All Futhark keywords.")
 
 (defconst futhark-highlight-numeric-types
@@ -131,6 +131,10 @@ name)."
           )
   "A regex describing a Futhark type.")
 
+(defconst futhark-highlight-attribute
+  (concat "\\(?:" "#\\[[^]]+\\]" "\\)")
+  "A regex describing a Futhark constructor.")
+
 (defvar futhark-highlight-font-lock
   `(
 
@@ -185,6 +189,10 @@ name)."
                "\\|" "\\\\" ; lambda
                "\\)")
      . font-lock-keyword-face)
+
+    ;; Attributes.
+    (,(concat "\\(" futhark-highlight-attribute "\\)")
+     . font-lock-preprocessor-face)
 
     ;; Types.
     ;;; Type aliases.  XXX: It would be nice to highlight also the right hand
