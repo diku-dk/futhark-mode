@@ -51,7 +51,8 @@
 
 (defcustom futhark-definition-ring-length 16
   "Length of `futhark-definition-ring`."
-  :type 'integer)
+  :type 'integer
+  :group 'futhark)
 
 (defvar futhark-definition-ring (make-ring futhark-definition-ring-length)
   "Ring of markers to implement definition stack.")
@@ -79,7 +80,8 @@
         (if (string-match "^/futlib/" file)
             (message "%s is a built-in" (cdr (assoc 'name info)))
           (find-file file)
-          (goto-line line)
+          (goto-char (point-min))
+          (forward-line line)
           (move-beginning-of-line nil)
           (forward-char col))))))
 
