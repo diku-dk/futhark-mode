@@ -36,7 +36,7 @@ name)."
 (defconst futhark-highlight-numeric-types
   '("i8" "i16" "i32" "i64"
     "u8" "u16" "u32" "u64"
-    "f32" "f64")
+    "f16" "f32" "f64")
   "A list of Futhark numeric types.")
 
 (defconst futhark-highlight-builtin-types
@@ -61,7 +61,7 @@ name)."
                   "\\(?:e-?[0-9]+\\)?"
                   "\\)"
                   )
-          "\\(?:i8\\|i16\\|i32\\|i64\\|u8\\|u16\\|u32\\|u64\\|f32\\|f64\\)?"
+          "\\(?:i8\\|i16\\|i32\\|i64\\|u8\\|u16\\|u32\\|u64\\|f16\\|f32\\|f64\\)?"
           "\\)\\>")
   "All numeric constants, including hex float literals.")
 
