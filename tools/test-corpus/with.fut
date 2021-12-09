@@ -1,6 +1,6 @@
 module mk_complex(T: real): (complex with real = T.t
                                      with complex = (T.t, T.t)) = {
-  let step td (s: state) =
+  def step td (s: state) =
     let spheres' = foo s.spheres
     let lights' = bar s.lights
     in s with eye = eye'

@@ -6,7 +6,7 @@ module B {
 
     val t = 3
 
-    let main () : int = 0
+    def main () : int = 0
 
     entry cat () : int = 0
   }

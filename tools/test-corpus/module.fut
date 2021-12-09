@@ -5,11 +5,11 @@ module A = {
 
   entry cat () : int = 0
 
-  let main () : int = 0
+  def main () : int = 0
 }
 
 module B = {
-  let f6 () =
+  def f6 () =
     let x = 0 in
     let y =
       let x = 0
