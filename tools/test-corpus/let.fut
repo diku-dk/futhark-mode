@@ -1,31 +1,31 @@
-let f0 () =
+def f0 () =
   let x = 0
   in x
 
-let f1 () =
+def f1 () =
   let x = 0 in
   x
 
-let f2 () =
+def f2 () =
   let x = 0
   let y = 0
   in x
 
-let f3 () =
+def f3 () =
   let x = 0
   let y = 0 in
   x
 
-let f4 () =
+def f4 () =
   let x = 0 in
   let y = 0 in
   x
 
-let f5 () =
+def f5 () =
   let x =
     0
 
-let f6 () =
+def f6 () =
   let x = 0 in
   let y =
     let x = 0
@@ -34,7 +34,7 @@ let f6 () =
   let z = 0
   in 0
 
-let f7 () =
+def f7 () =
   let x = 0 in
   let y =
     let x = 0
@@ -46,10 +46,10 @@ let f7 () =
   let z = 0
   in z
 
-let f8 () =
+def f8 () =
   let (x, y) = (1, 2)
   let z = x + 3
   in z
 
 -- A comment.
-let f9 () = x
+def f9 () = x

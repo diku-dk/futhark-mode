@@ -1,13 +1,13 @@
-let f = a * b +
+def f = a * b +
         c * d
 
-let f = a + b *
+def f = a + b *
             c
 
-let f =
+def f =
   a && b && c ||
   d && e
 
-let f =
+def f =
   a || b &&
        c

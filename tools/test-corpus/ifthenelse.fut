@@ -1,28 +1,28 @@
-let foo () =
+def foo () =
   if x then x else x
 
-let foo () =
+def foo () =
   if x
   then x
   else x
 
-let foo () =
+def foo () =
   if x
   then x
   else if x
   then x else x
 
-let foo () =
+def foo () =
   if x then x
   else if x then x
   else x
 
-let foo () =
+def foo () =
   if a < b
   then if a < c then a else c
   else if b < c then b else c
 
-let foo () =
+def foo () =
   if a < b
   then if a < c
        then a
@@ -31,31 +31,31 @@ let foo () =
   then b
   else c
 
-let foo () =
+def foo () =
   let x =
     if a then b else
     let x = 2 in x
   in x
 
-let foo () =
+def foo () =
   if x then y else
   if x then y else
     x
 
-let foo () =
+def foo () =
   if x
   then y
   else
   let z = 3
   in z
 
-let foo () =
+def foo () =
   if x then y
   else if x then y
   else if x then z
   else 0
 
-let foo [m] [n] () =
+def foo [m] [n] () =
   if x
   then y
   else if x
@@ -66,7 +66,7 @@ let foo [m] [n] () =
   then z
   else 0
 
-let foo () =
+def foo () =
   if cond
   then
   let cost[id] = cost[tid] + 1

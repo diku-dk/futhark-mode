@@ -1,25 +1,25 @@
-let p =
+def p =
   f
   x
 
-let p = (foo
+def p = (foo
          x)
 
-let p = foo x
+def p = foo x
             y
 
-let p = foo a b
+def p = foo a b
             c d
             e
 
-let p = (foo x
+def p = (foo x
              y)
 
-let p = ((foo x)
+def p = ((foo x)
          y)
 
-let p = (foo x)
+def p = (foo x)
         y
 
-let p = (f x, f
+def p = (f x, f
               y)

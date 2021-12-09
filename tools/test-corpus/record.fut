@@ -1,4 +1,4 @@
-let init (h: i32) (w: i32): state =
+def init (h: i32) (w: i32): state =
   {w, h,
    triangles=
      [ { p0={x=310, y=0, z=500}

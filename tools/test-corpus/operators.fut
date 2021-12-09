@@ -1,4 +1,4 @@
-let f x = x
+def f x = x
           |> p
           |> r
           |> u (p

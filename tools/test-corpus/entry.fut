@@ -1,4 +1,4 @@
-let foo () =
+def foo () =
   let bar = 3
   in 3
 

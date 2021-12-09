@@ -1,4 +1,4 @@
-let foo (bar: i32): i32 =
+def foo (bar: i32): i32 =
   {position={x=posx, y=posy, z=posz},
    mass,
    velocity={x=velx,

@@ -1,18 +1,18 @@
-let f = \x ->
+def f = \x ->
           x + 2
 
-let g = map (\x ->
+def g = map (\x ->
                let y = 2
                in x + y)
             [1,2,3]
 
-let h = map (\(x) ->
+def h = map (\(x) ->
                x)
 
-let f = map (\x ->
+def f = map (\x ->
                x ||
                f)
 
-let f = map (\x
+def f = map (\x
               y ->
                y + x)

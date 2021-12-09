@@ -2,11 +2,11 @@
 -- not be one good way.  The easy way is just to disable the automatic
 -- indentation for this family of cases.
 
-let foo [n] (n_steps: i32) (epsilon: f32) (time_step: f32)
+def foo [n] (n_steps: i32) (epsilon: f32) (time_step: f32)
              (bodies: [n]body): [n]body =
   baz
 
-let foo
+def foo
   (n_steps: i32) (epsilon: f32) (time_step: f32)
   (bodies: [n]body): [n]body =
   baz

@@ -1,4 +1,4 @@
-let f (x : #foo) =
+def f (x : #foo) =
   match x
   case #foo ->
     match x

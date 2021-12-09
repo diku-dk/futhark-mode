@@ -1,4 +1,4 @@
-let foo () =
+def foo () =
   let foo () = 3
   let foo = 3
   in foo
@@ -6,7 +6,7 @@ let foo () =
 
 -- The same, but with some empty lines:
 
-let foo () =
+def foo () =
 
   let foo () = 3
 

@@ -1,4 +1,4 @@
-let f (x : #foo | #bar) : #foo | #bar =
+def f (x : #foo | #bar) : #foo | #bar =
   match x
   case #foo ->
     #bar

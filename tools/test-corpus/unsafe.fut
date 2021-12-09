@@ -1,8 +1,8 @@
-let f x =
+def f x =
   unsafe
   let x = 2 in x
 
-let f =
+def f =
   let c1 = if true
            then x * unsafe x
            else x

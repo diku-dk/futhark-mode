@@ -391,6 +391,7 @@ Assumes CODE does not error."
        ;; openers/closers.  SMIE's operator precedence grammar engine gets less
        ;; confused this way.
        (decls (decls "entry" decls)
+              (decls "def" decls)
               (decls "top-level-let" decls)
               (decls "type" decls)
               (decls "val" decls)
@@ -403,7 +404,7 @@ Assumes CODE does not error."
      ;; Resolve conflicts (poorly): If more than one relation exists between two
      ;; tokens (i.e., a shift/reduce conflict), just collapse the relations into
      ;; a single '=' relation (i.e., shift).
-     '((assoc "entry" "top-level-let" "type" "val" "include"
+     '((assoc "entry" "def" "top-level-let" "type" "val" "include"
               "import" "module" "open" "local"))
      '((assoc "," "|" "case" "->"))
      )
@@ -448,6 +449,7 @@ Assumes CODE does not error."
        (let ((base (futhark-indent-max
                     (futhark-indent-first-backward-token-top-level-let)
                     (futhark-indent-first-backward-token "let")
+                    (futhark-indent-first-backward-token "def")
                     (futhark-indent-first-backward-token "entry")
                     (futhark-indent-first-backward-token "type"))))
          (when base
@@ -466,7 +468,7 @@ Assumes CODE does not error."
        (when (looking-at (futhark-indent-symbol "let"))
          `(column . ,(current-column)))))
 
-    (`(:before . ,(or "entry" "type" "val"
+    (`(:before . ,(or "def" "entry" "type" "val"
                       "include" "import" "module" "open" "local"))
      (when (smie-rule-bolp)
        (let ((outer (futhark-indent-find-outer-module)))
@@ -645,7 +647,7 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
            (let ((cur (point))
                  (function-start (futhark-indent-max
                                   (futhark-indent-first-backward-token-top-level-let)
-                                  (futhark-indent-first-backward-token "let")
+                                  (futhark-indent-first-backward-token "def")
                                   (futhark-indent-first-backward-token "entry"))))
              (when function-start
                (save-excursion
