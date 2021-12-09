@@ -30,7 +30,7 @@ name)."
 (defconst futhark-highlight-keywords
   '("if" "then" "else" "let" "loop" "in" "with" "type"
     "val" "entry" "for" "while" "do" "case" "match"
-    "include" "import" "module" "open" "local" "assert")
+    "include" "import" "module" "open" "local" "assert" "def")
   "All Futhark keywords.")
 
 (defconst futhark-highlight-numeric-types
@@ -142,6 +142,11 @@ name)."
 
       ;;; Value specs.
     (,(concat "val" futhark-highlight-ws1
+              "\\(" futhark-highlight-var "\\)")
+     . '(1 font-lock-function-name-face))
+
+    ;;; Definitions.
+    (,(concat "def" futhark-highlight-ws1
               "\\(" futhark-highlight-var "\\)")
      . '(1 font-lock-function-name-face))
 
