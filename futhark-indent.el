@@ -603,34 +603,6 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
     (or (futhark-indent-try futhark-indent-line-basic)
         (smie-indent-line))))
 
-(defun futhark-indent-line-cycle-let ()
-  "If looking at 'let', cycle between the valid indentations.
-If the entire Futhark file is gramatically correct, there will
-only be one valid indentation for every 'let'.  However, if a
-'let' follows an incomplete top level definition -- e.g., one
-containing a chain of let bindings without a final 'in'-- then
-the token can either be a continuation of the previous chain, or
-a new top level definition."
-  (let ((let-indent (save-excursion
-                      (forward-line 0)
-                      (skip-syntax-forward " \t")
-                      (and (looking-at (futhark-indent-symbol "let"))
-                           (current-column)))))
-    (when let-indent
-      (let* ((outer (futhark-indent-find-outer-module))
-             (top-level-indent (if outer (+ outer futhark-indent-level) 0)))
-        (cond (; is indented as a top-level let; try to force indent as a normal let
-               (= let-indent top-level-indent)
-               (indent-line-to 1)
-               (futhark-indent-line-base))
-              (t ; vice versa
-               (indent-line-to top-level-indent)))))))
-
-(defun futhark-indent-line-cycle ()
-  "Indent the current line.  Cycle between valid indentations."
-  (or
-   (futhark-indent-line-cycle-let)))
-
 (defun futhark-indent-line-with-state ()
   "Indent the current line, and update the state as well.
 Used only for indenting regions, and only to make it go faster."
