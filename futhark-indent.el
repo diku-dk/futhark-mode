@@ -597,7 +597,7 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
       (progn (indent-line-to indent)
              t))))
 
-(defun futhark-indent-line-base ()
+(defun futhark-indent-line ()
   "Indent the current line."
   (let ((start (point)))
     (or (futhark-indent-try futhark-indent-line-basic)
@@ -607,7 +607,7 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lin
   "If looking at 'let', cycle between the valid indentations.
 If the entire Futhark file is gramatically correct, there will
 only be one valid indentation for every 'let'.  However, if a
-'let' follows an incomplete top level let definition -- e.g., one
+'let' follows an incomplete top level definition -- e.g., one
 containing a chain of let bindings without a final 'in'-- then
 the token can either be a continuation of the previous chain, or
 a new top level definition."
@@ -631,20 +631,10 @@ a new top level definition."
   (or
    (futhark-indent-line-cycle-let)))
 
-(defun futhark-indent-line ()
-  "Indent the current line.
-If `last-command' was also `futhark-indent-line' (via
-`indent-for-tab-command'), then cycle through the valid
-indentations for the line, if multiple exist."
-  (cond ((eq last-command 'indent-for-tab-command)
-         (futhark-indent-line-cycle))
-        (t
-         (futhark-indent-line-base))))
-
 (defun futhark-indent-line-with-state ()
   "Indent the current line, and update the state as well.
 Used only for indenting regions, and only to make it go faster."
-  (futhark-indent-line-base)
+  (futhark-indent-line)
   (futhark-indent-state-current-outer-update))
 
 (defun futhark-indent-region (start end)
@@ -675,7 +665,7 @@ on each line, but contains optimisations to make it run faster."
     ;; top-level if its indentation is 0 (and it is not enclosed in a module).
     (indent-line-to current-indentation)
     ;; Then just indent.
-    (futhark-indent-line-base)))
+    (futhark-indent-line)))
 
 (defun futhark-indent-setup ()
   "Setup Emacs' Simple Minded Indentation Engine for Futhark."
