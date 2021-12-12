@@ -613,14 +613,14 @@ Used only for indenting regions, and only to make it go faster."
   "Indent the region from START to END.
 This has the same semantics as running `futhark-indent-line'
 on each line, but contains optimisations to make it run faster."
-  (futhark-indent-state-current-outer-start)
   (save-excursion
     (goto-char start)
+    (futhark-indent-state-current-outer-start)
     (while (and (< (point) end) (not (eobp)))
       (unless (and (bolp) (eolp))
         (futhark-indent-line-with-state))
-      (forward-line 1)))
-  (futhark-indent-state-current-outer-stop))
+      (forward-line 1))
+    (futhark-indent-state-current-outer-stop)))
 
 (defun futhark-indent-newline-and-indent ()
   "Do the same as `newline-and-indent', but work around top level let."
