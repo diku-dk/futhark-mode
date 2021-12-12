@@ -435,7 +435,6 @@ Assumes CODE does not error."
        (ignore-errors (forward-char))
        (ignore-errors (backward-sexp))
        (ignore-errors (backward-char))
-       (message "%c" (char-after))
        (when (looking-at "#")
          `(column . ,(current-column)))))
 
