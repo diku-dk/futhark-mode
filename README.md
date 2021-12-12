@@ -1,6 +1,6 @@
 # futhark-mode for Emacs
 
-[![MELPA](https://melpa.org/packages/futhark-mode-badge.svg)](https://melpa.org/#/futhark-mode) [![Build Status](https://travis-ci.org/diku-dk/futhark-mode.svg?branch=master)](https://travis-ci.org/diku-dk/futhark-mode)
+[![MELPA](https://melpa.org/packages/futhark-mode-badge.svg)](https://melpa.org/#/futhark-mode)[![CI](https://github.com/diku-dk/futhark-mode/workflows/CI/badge.svg)](https://github.com/diku-dk/futhark-mode/actions)
 
 See the file `futhark-mode.el`.  This Emacs mode provides:
 
