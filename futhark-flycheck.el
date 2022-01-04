@@ -27,8 +27,8 @@ See URL `https://github.com/diku-dk/futhark'."
     :modes 'futhark-mode
     :error-parser flycheck-parse-with-patterns-without-color
     :error-patterns
-    ((error line-start "Error at " (file-name) ":" line ":" column "-"
-            (optional (one-or-more not-newline) ":") (message (one-or-more anything))
+    ((error line-start "Error at " (file-name) ":" line ":" column
+            (optional "-" (one-or-more not-newline)) ":" (message (one-or-more anything))
             "If you find")
      (error line-start "Unexpected end of file")
      (error (message "lexical error") " at line " line ", column " column)
