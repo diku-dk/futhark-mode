@@ -81,7 +81,7 @@
             (message "%s is a built-in" (cdr (assoc 'name info)))
           (find-file file)
           (goto-char (point-min))
-          (forward-line line)
+          (forward-line (1- line))
           (move-beginning-of-line nil)
           (forward-char col))))))
 
