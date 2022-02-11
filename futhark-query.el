@@ -77,7 +77,7 @@
       (let ((file (match-string 1 def))
             (line (string-to-number (match-string 2 def)))
             (col (1- (string-to-number (match-string 3 def)))))
-        (if (string-match "^/futlib/" file)
+        (if (string-match "^/prelude/" file)
             (message "%s is a built-in" (cdr (assoc 'name info)))
           (find-file file)
           (goto-char (point-min))
