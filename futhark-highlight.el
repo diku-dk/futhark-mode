@@ -72,6 +72,10 @@ name)."
   (concat "\\(?:" "[_[:alpha:]][_'[:alnum:]]*" "\\)")
   "A regex describing a Futhark variable.")
 
+(defconst futhark-highlight-hole
+  (concat "\\(?:" "\\?\\?\\?" "\\)")
+  "A regex describing a Futhark typed holed.")
+
 (defconst futhark-highlight-constructor
   (concat "\\(?:" "#[_'[:alnum:]]+" "\\)")
   "A regex describing a Futhark constructor.")
@@ -182,6 +186,10 @@ name)."
       ;;; Numbers
     (,(concat "\\(" futhark-highlight-number "\\)")
      . font-lock-constant-face)
+
+      ;;; Holes
+    (,(concat "\\(" futhark-highlight-hole "\\)")
+     . font-lock-warning-face)
 
       ;;; Characters
     (,(concat "\\(" futhark-highlight-character "\\)")
