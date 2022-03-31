@@ -73,7 +73,7 @@ name)."
   "A regex describing a Futhark variable.")
 
 (defconst futhark-highlight-hole
-  (concat "\\(?:" "\\?\\?\\?" "\\)")
+  (concat "\\(?:" "\\S." "\\?\\?\\?" "\\S." "\\)")
   "A regex describing a Futhark typed holed.")
 
 (defconst futhark-highlight-constructor
