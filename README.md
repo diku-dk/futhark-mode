@@ -7,9 +7,9 @@ See the file `futhark-mode.el`.  This Emacs mode provides:
   * syntax highlighting
   * automatic indentation
   * interaction with an inferior `futhark repl` process
-  * flycheck definition
-  * ElDoc support
-  * jumping to definition of function or variable at point
+
+For more features, try [Eglot](https://github.com/joaotavora/eglot),
+which works well with Futhark's built-in LSP server `futhark lsp`.
 
 ## Installation
 
@@ -28,9 +28,6 @@ bells and whistles.  But it does have some commands:
   * **C-c C-l** (`futhark-load-file`) loads the current file into
     `futhark repl`, creating a new instance if a current one does not
     exist.
-
-  * **M-.** jumps to the definition of the function or variable under
-    point, and **M-,** returns from the definition.
 
 ## Testing
 
