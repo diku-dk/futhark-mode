@@ -32,10 +32,6 @@ bells and whistles.  But it does have some commands:
   * **M-.** jumps to the definition of the function or variable under
     point, and **M-,** returns from the definition.
 
-Also consider `M-x flycheck-mode` to get immediate information about
-type- and syntax errors (requires installation of the `flycheck` Emacs
-package).
-
 ## Testing
 
 Run `tools/test-indentation` to test if the auto-indentation works.  If
