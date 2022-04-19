@@ -8,7 +8,7 @@ See the file `futhark-mode.el`.  This Emacs mode provides:
   * automatic indentation
   * interaction with an inferior `futhark repl` process
 
-For more features, try [Eglot](https://github.com/joaotavora/eglot),
+For IDE-like features, try [Eglot](https://github.com/joaotavora/eglot),
 which works well with Futhark's built-in LSP server `futhark lsp`.
 
 ## Installation
@@ -29,7 +29,18 @@ bells and whistles.  But it does have some commands:
     `futhark repl`, creating a new instance if a current one does not
     exist.
 
-## Testing
+## Eglot
+
+You can start Eglot automatically whenever you edit a Futhark file by
+adding
+
+```elisp
+(add-hook 'futhark-mode-hook 'eglot-ensure)
+```
+
+to your init file.
+
+## Testing (for developers)
 
 Run `tools/test-indentation` to test if the auto-indentation works.  If
 you find a piece of code that futhark-mode cannot indent properly,
