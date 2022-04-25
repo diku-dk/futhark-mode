@@ -495,105 +495,111 @@ Assumes CODE does not error."
                   (futhark-indent-max (futhark-indent-first-backward-token "match")
                                       (futhark-indent-first-backward-token "case")))))))
 
+(defun futhark-compute-indentation ()
+  "Compute indentation for current line based on ad-hoc rules.
+
+Returns NIL if no indentation can be computed."
+  (save-excursion
+    (forward-line 0)
+    (skip-chars-forward " \t")
+    (let* ((cur-col (current-column)))
+      (cond
+       ;; Align closing '}' to 'module'/'open', and not directly to the
+       ;; matching '{' (as SMIE would seemingly have it).
+       ((looking-at "}")
+        (futhark-indent-find-outer-module-1)) ; always use the
+                                        ; non-state-dependent variant
+
+       ;; Indent a '}'-subsequent line relative to the '}' symbol, unless it
+       ;; is probably part of a record and not a module.
+       ((and
+         (not (or (looking-at ",") (looking-at ")") (looking-at "]")))
+         (save-excursion
+           (forward-line -1)
+           (looking-at "[[:space:]]*}[[:space:]]*$")))
+        (save-excursion
+          (forward-line -1)
+          (skip-syntax-forward " \t")
+          (current-column)))
+
+       ;; Emacs 24 (and the accompanying SMIE) subtly fail at indenting a ']'
+       ;; directly below the matching '['.
+       ((looking-at "]")
+        (save-excursion
+          (backward-up-list 1)
+          (current-column)))
+
+       ;; Align to previous line if that is a comment.
+       ((save-excursion
+          (forward-line -1)
+          (skip-syntax-forward " \t")
+          (looking-at comment-start))
+        (save-excursion
+          (forward-line -1)
+          (skip-syntax-forward " \t")
+          (current-column)))
+
+       ;; Align comment to next non-comment line.
+       ((looking-at comment-start)
+        (save-excursion
+          (forward-comment (count-lines (point-min) (point)))
+          (current-column)))
+
+       ;; Work around the limitations of the 'in-implicit' token: If the user
+       ;; has (temporarily) removed all indentation in front of a 'let'
+       ;; token, there is no empty space for the implicit 'in' token.  In
+       ;; this edge case we force the insertion of spaces, and leave the
+       ;; heavy lifting to SMIE.
+       ((and (equal "let" (save-excursion
+                            (futhark-indent-forward-token)))
+             (save-excursion
+               (forward-line 0)
+               (looking-at "[[:space:]]?let\\>")))
+        (save-excursion
+          (forward-line 0)
+          (insert "  ")
+          nil))
+
+       ;; Use a simpler default than SMIE for where to start the new line.
+       ;; SMIE likes to assume that we want to keep adding terms to a
+       ;; previous expression if one exists, but it is more common to want to
+       ;; make a new binding.  This only affects the default position on an
+       ;; *empty* line, and only if that empty line has a very specific
+       ;; context; if the programmer writes something else than a new
+       ;; binding, that will also be indented correctly.
+       ((and (futhark-indent-is-empty-line)
+             (save-excursion
+               (not (equal "=" (futhark-indent-backward-token))))
+             (save-excursion
+               (forward-line -1)
+               (or (save-excursion
+                     (member (futhark-indent-forward-token) '("in-implicit" "let")))
+                   (futhark-indent-is-empty-line))))
+        (or
+         (futhark-indent-column-of (futhark-indent-first-backward-token "let"))
+         (let ((c (futhark-indent-column-of (futhark-indent-first-backward-token ""))))
+           (when c (max 0 (1- c))))))
+
+       ;; Do not auto-indent multi-line function parameters.
+       (t
+        (let ((cur (point))
+              (function-start (futhark-indent-max
+                               (futhark-indent-first-backward-token "def")
+                               (futhark-indent-first-backward-token "entry"))))
+          (when function-start
+            (save-excursion
+              (goto-char function-start)
+              (let ((first-eq (futhark-indent-first-forward-token "=")))
+                (when (and first-eq
+                           (< cur first-eq))
+                  cur-col))))))))))
+
 (defun futhark-indent-line-basic ()
   "Try to indent the current line.
 Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lines."
-  (forward-line 0)
-  (skip-chars-forward " \t")
-  (let* ((cur-col (current-column))
-        (indent
-         (cond
-          ;; Align closing '}' to 'module'/'open', and not directly to the
-          ;; matching '{' (as SMIE would seemingly have it).
-          ((looking-at "}")
-           (futhark-indent-find-outer-module-1)) ; always use the
-                                                 ; non-state-dependent variant
-
-          ;; Indent a '}'-subsequent line relative to the '}' symbol, unless it
-          ;; is probably part of a record and not a module.
-          ((and
-            (not (or (looking-at ",") (looking-at ")") (looking-at "]")))
-            (save-excursion
-              (forward-line -1)
-              (looking-at "[[:space:]]*}[[:space:]]*$")))
-           (save-excursion
-             (forward-line -1)
-             (skip-syntax-forward " \t")
-             (current-column)))
-
-          ;; Emacs 24 (and the accompanying SMIE) subtly fail at indenting a ']'
-          ;; directly below the matching '['.
-          ((looking-at "]")
-           (save-excursion
-             (backward-up-list 1)
-             (current-column)))
-
-          ;; Align to previous line if that is a comment.
-          ((save-excursion
-             (forward-line -1)
-             (skip-syntax-forward " \t")
-             (looking-at comment-start))
-           (save-excursion
-             (forward-line -1)
-             (skip-syntax-forward " \t")
-             (current-column)))
-
-          ;; Align comment to next non-comment line.
-          ((looking-at comment-start)
-           (save-excursion
-             (forward-comment (count-lines (point-min) (point)))
-             (current-column)))
-
-          ;; Work around the limitations of the 'in-implicit' token: If the user
-          ;; has (temporarily) removed all indentation in front of a 'let'
-          ;; token, there is no empty space for the implicit 'in' token.  In
-          ;; this edge case we force the insertion of spaces, and leave the
-          ;; heavy lifting to SMIE.
-          ((and (equal "let" (save-excursion
-                               (futhark-indent-forward-token)))
-                (save-excursion
-                  (forward-line 0)
-                  (looking-at "[[:space:]]?let\\>")))
-           (save-excursion
-             (forward-line 0)
-             (insert "  ")
-             nil))
-
-          ;; Use a simpler default than SMIE for where to start the new line.
-          ;; SMIE likes to assume that we want to keep adding terms to a
-          ;; previous expression if one exists, but it is more common to want to
-          ;; make a new binding.  This only affects the default position on an
-          ;; *empty* line, and only if that empty line has a very specific
-          ;; context; if the programmer writes something else than a new
-          ;; binding, that will also be indented correctly.
-          ((and (futhark-indent-is-empty-line)
-                (save-excursion
-                  (not (equal "=" (futhark-indent-backward-token))))
-                (save-excursion
-                  (forward-line -1)
-                  (or (save-excursion
-                        (member (futhark-indent-forward-token) '("in-implicit" "let")))
-                      (futhark-indent-is-empty-line))))
-           (or
-            (futhark-indent-column-of (futhark-indent-first-backward-token "let"))
-            (let ((c (futhark-indent-column-of (futhark-indent-first-backward-token ""))))
-              (when c (max 0 (1- c))))))
-
-          ;; Do not auto-indent multi-line function parameters.
-          (t
-           (let ((cur (point))
-                 (function-start (futhark-indent-max
-                                  (futhark-indent-first-backward-token "def")
-                                  (futhark-indent-first-backward-token "entry"))))
-             (when function-start
-               (save-excursion
-                 (goto-char function-start)
-                 (let ((first-eq (futhark-indent-first-forward-token "=")))
-                   (when (and first-eq
-                              (< cur first-eq))
-                     cur-col)))))))))
+  (let ((indent (futhark-compute-indentation)))
     (when indent
-      (progn (indent-line-to indent)
+      (progn (save-excursion (indent-line-to indent))
              t))))
 
 (defun futhark-indent-line ()
