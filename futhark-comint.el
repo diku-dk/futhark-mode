@@ -31,7 +31,7 @@
   "Prompt for `run-futhark'.")
 
 (defun run-futhark ()
-  "Run an inferior instance of `futharki' inside Emacs."
+  "Run an inferior instance of `futhark repl' inside Emacs."
   (interactive)
   (pop-to-buffer
    (apply 'make-comint "futhark" futhark-comint-interpreter-name nil futhark-comint-interpreter-args))
@@ -55,11 +55,12 @@
   (set (make-local-variable 'paragraph-start) futhark-comint-prompt-regexp))
 
 (defun futhark-comint-load-file (file)
-  "Load FILE into the futharki process.
+  "Load FILE into the 'futhark repl' process.
 FILE is the file visited by the current buffer.
 
-Automatically starts an inferior futharki process with `run-futhark`
-if a running futharki instance cannot be found."
+Automatically starts an inferior 'futhark repl' process with
+`run-futhark` if a running 'futhark repl' instance cannot be
+found."
   (interactive
    (list (or buffer-file-name
              (read-file-name "File to load: " nil nil t))))
