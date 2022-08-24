@@ -20,13 +20,11 @@
 (require 'comint)
 
 (defcustom futhark-comint-interpreter-name "futhark"
-  "Futhark interpreter to run.
-
-Do not put command line options here; they go in `futhark-comint-interpreter-args'."
+  "Futhark interpreter to run, not including options."
   :type 'string :group 'futhark)
 
 (defcustom futhark-comint-interpreter-args '("repl")
-  "Default command line options to pass to `futhark-comint-interpreter-name', if any."
+  "Command line passed to `futhark-comint-interpreter-name', if any."
   :type '(repeat string) :group 'futhark)
 
 (defvar futhark-comint-prompt-regexp "^\\(?:\\[[0-9]+\\]\\)"
