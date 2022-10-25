@@ -169,16 +169,16 @@ whitespace characters."
   "Go to the first token through FUNC-TOKEN and FUNC-SEXP.
 Return its point."
   `(save-excursion
-    (let ((cur (point))
-          (found nil))
-      (while (and cur (not found))
-        (let ((found-cur (,func-token)))
-          (cond ((equal found-cur token)
-                 (setq found t))
-                ((equal found-cur "")
-                 (ignore-errors (,func-sexp 1) t))))
-        (setq cur (if (= (point) cur) nil (point))))
-      (when found (point)))))
+     (let ((cur (point))
+           (found nil))
+       (while (and cur (not found))
+         (let ((found-cur (,func-token)))
+           (cond ((equal found-cur token)
+                  (setq found t))
+                 ((equal found-cur "")
+                  (ignore-errors (,func-sexp 1) t))))
+         (setq cur (if (= (point) cur) nil (point))))
+       (when found (point)))))
 
 (defun futhark-indent-first-backward-token (token)
   "Find the first token TOKEN before the current position, if it exists.
@@ -421,18 +421,18 @@ See SMIE documentation for info on KIND and TOKEN."
          `(column . ,(if outer (+ outer futhark-indent-level) 0)))))
 
     (`(:after . ,(or "then" "else" "do"))
-     (when (smie-rule-next-p "let") ; waste a little less indentation in these
-                                    ; special cases
+     (when (smie-rule-next-p "let")
+       ;; waste a little less indentation in these special cases
        (smie-rule-parent)))
 
-    (`(:after . "unsafe") ; indent next token directly under 'unsafe'
+    (`(:after . "unsafe")  ; indent next token directly under 'unsafe'
      `(column . ,(current-column)))
 
     (`(:before . ",")
      (when (smie-rule-bolp)
        (smie-rule-parent)))
 
-    (`(:after . "]") ; attributes
+    (`(:after . "]")                    ; attributes
      (save-excursion
        (ignore-errors (forward-char))
        (ignore-errors (backward-sexp))
@@ -440,7 +440,7 @@ See SMIE documentation for info on KIND and TOKEN."
        (when (looking-at "#")
          `(column . ,(current-column)))))
 
-    (`(:after . ":") ; functors
+    (`(:after . ":")                    ; functors
      (smie-rule-parent futhark-indent-level))
 
     ;; Handle long 'val' declarations by disabling auto-indentation.
@@ -453,9 +453,9 @@ See SMIE documentation for info on KIND and TOKEN."
            `(column . (current-column))))))
 
     (`(:after . "->")
-     (cond ((smie-rule-parent-p "\\") ; lambdas
+     (cond ((smie-rule-parent-p "\\")   ; lambdas
             futhark-indent-level)
-           ((save-excursion ; case expressions
+           ((save-excursion             ; case expressions
               (futhark-indent-backward-token)
               (equal (futhark-indent-backward-token) "case"))
             (save-excursion
@@ -483,9 +483,9 @@ See SMIE documentation for info on KIND and TOKEN."
                (ignore-errors (backward-sexp 1) t) t)
         (looking-at (futhark-indent-symbol "if"))
         (equal (futhark-indent-backward-token) "else")
-        -5))) ; length of 'else ' (relative un-indent)
+        -5)))                 ; length of 'else ' (relative un-indent)
 
-    (`(:before . "|") ; in type constructor definitions
+    (`(:before . "|")                ; in type constructor definitions
      (let ((p (and (smie-rule-bolp)
                    (progn (futhark-indent-forward-token)
                           (looking-at " *#"))
