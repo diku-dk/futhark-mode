@@ -374,7 +374,9 @@ Assumes CODE does not error."
 ;;; Extra indentation rules to supplement the grammar-generated ones:
 
 (defun futhark-indent-rules (kind token)
-  "The SMIE rules for indentation.  See SMIE documentation for info on KIND and TOKEN."
+  "The SMIE rules for indentation.
+
+See SMIE documentation for info on KIND and TOKEN."
   ;; Uncomment this for convenient debugging.  Note that SMIE will
   ;; call this function several times as it tries to hazily figure out
   ;; what is going on, so keep your *Messages* buffer handy.
@@ -596,7 +598,9 @@ Returns NIL if no indentation can be computed."
 
 (defun futhark-indent-line-basic ()
   "Try to indent the current line.
-Handles edge cases where SMIE fails.  SMIE will not re-indent these indented lines."
+
+Handles edge cases where SMIE fails.  SMIE will not re-indent
+these indented lines."
   (let ((indent (futhark-compute-indentation)))
     (when indent
       (progn (save-excursion (indent-line-to indent))
