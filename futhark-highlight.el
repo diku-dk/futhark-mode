@@ -66,7 +66,7 @@ name)."
   "All numeric constants, including hex float literals.")
 
 (defconst futhark-highlight-character
-  (concat "'\\?[^']*'"))
+  (concat "'\\\\?[^']?'"))
 
 (defconst futhark-highlight-var
   (concat "\\(?:" "[_[:alpha:]][_'[:alnum:]]*" "\\)")
