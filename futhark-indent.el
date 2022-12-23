@@ -603,7 +603,7 @@ Handles edge cases where SMIE fails.  SMIE will not re-indent
 these indented lines."
   (let ((indent (futhark-compute-indentation)))
     (when indent
-      (progn (save-excursion (indent-line-to indent))
+      (progn (indent-line-to indent)
              t))))
 
 (defun futhark-indent-line ()
@@ -630,23 +630,6 @@ on each line, but contains optimisations to make it run faster."
         (futhark-indent-line-with-state))
       (forward-line 1))
     (futhark-indent-state-current-outer-stop)))
-
-(defun futhark-indent-newline-and-indent ()
-  "Do the same as `newline-and-indent', but work around top level let."
-  (interactive "*")
-  (let ((current-indentation
-         (save-excursion
-           (forward-line 0)
-           (skip-chars-forward " \t")
-           (current-column))))
-    (delete-horizontal-space t)
-    (newline nil t)
-    ;; First use the same indentation as the previous line.  This works around
-    ;; the lexer, which will refuse to indent a 'let' that it considers
-    ;; top-level if its indentation is 0 (and it is not enclosed in a module).
-    (indent-line-to current-indentation)
-    ;; Then just indent.
-    (futhark-indent-line)))
 
 (defun futhark-indent-setup ()
   "Setup Emacs' Simple Minded Indentation Engine for Futhark."

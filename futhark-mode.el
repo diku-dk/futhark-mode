@@ -39,7 +39,6 @@
 (defvar futhark-mode-map
   (let ((map (make-keymap)))
     (define-key map "\C-c\C-l" #'futhark-comint-load-file)
-    (define-key map (kbd "RET") #'futhark-indent-newline-and-indent)
     map)
   "Keymap for `futhark-mode'.")
 
