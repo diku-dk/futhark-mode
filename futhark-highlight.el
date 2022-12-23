@@ -178,6 +178,10 @@ name)."
      . '(1 font-lock-variable-name-face))
 
     ;; Constants.
+      ;;; Characters
+    (,(concat "\\(" futhark-highlight-character "\\)")
+     . font-lock-constant-face)
+
       ;;; Constructors
     (,(concat "\\(" futhark-highlight-constructor "\\)")
      . font-lock-constant-face)
@@ -193,10 +197,6 @@ name)."
       ;;; Holes
     (,(concat "\\(" futhark-highlight-hole "\\)")
      . font-lock-warning-face)
-
-      ;;; Characters
-    (,(concat "\\(" futhark-highlight-character "\\)")
-     . font-lock-constant-face)
 
     ;; Keywords.
     ;; Placed after constants, so e.g. '#open' is highlighted
