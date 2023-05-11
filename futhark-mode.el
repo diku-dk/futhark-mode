@@ -45,12 +45,8 @@
 (defvar futhark-syntax-table
   (let ((st (make-syntax-table)))
     (modify-syntax-entry ?\n ">" st)
-    ;; Make ' and # be part of the word class.  Technically, they should
-    ;; probably be part of the symbol class, but unlike _ they typically occur
-    ;; only in the beginning or end of a word, so this makes `backward-word' and
-    ;; `forward-word' nicer to use.
-    (modify-syntax-entry ?' "w" st)
-    (modify-syntax-entry ?# "w" st)
+    (modify-syntax-entry ?' "_" st)
+    (modify-syntax-entry ?# "_" st)
 
     (modify-syntax-entry ?\( "()" st)
     (modify-syntax-entry ?\) ")(" st)
