@@ -55,6 +55,7 @@
     (modify-syntax-entry ?\{ "(}" st)
     (modify-syntax-entry ?\} "){" st)
     (modify-syntax-entry ?\" "\"" st)
+    (modify-syntax-entry ?\` "$`" st)
 
     ;; Symbol characters are treated as punctuation because they are
     ;; not able to form identifiers with word constituent 'w' class.
