@@ -191,8 +191,8 @@ name)."
      . font-lock-constant-face)
 
       ;;; Numbers
-    (,(concat "\\(\\S_" futhark-highlight-number "\\)")
-     . font-lock-constant-face)
+    (,(concat "\\S_\\(" futhark-highlight-number "\\)")
+     . (1 font-lock-constant-face))
 
       ;;; Holes
     (,(concat "\\(" futhark-highlight-hole "\\)")
