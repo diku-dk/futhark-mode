@@ -55,11 +55,11 @@
   (set (make-local-variable 'paragraph-start) futhark-comint-prompt-regexp))
 
 (defun futhark-comint-load-file (file)
-  "Load FILE into the 'futhark repl' process.
+  "Load FILE into the \"futhark repl\" process.
 FILE is the file visited by the current buffer.
 
-Automatically starts an inferior 'futhark repl' process with
-`run-futhark` if a running 'futhark repl' instance cannot be
+Automatically starts an inferior \"futhark repl\" process with
+`run-futhark' if a running \"futhark repl\" instance cannot be
 found."
   (interactive
    (list (or buffer-file-name
