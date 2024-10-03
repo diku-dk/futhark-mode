@@ -1,11 +1,6 @@
 ;;; futhark-dev.el --- developer tools for futhark-mode  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) DIKU 2013-2019, University of Copenhagen
-;;
-;; URL: https://github.com/diku-dk/futhark-mode
-;; Keywords: languages
-;; Version: 0.2
-;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
 
 ;; This file is not part of GNU Emacs.
 
