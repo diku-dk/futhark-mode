@@ -65,7 +65,7 @@ whitespace characters."
   (buffer-substring-no-properties
    (point)
    (progn (or (/= 0 (skip-syntax-forward "w_")) ; variables, keywords
-              (skip-syntax-forward ".")) ; operators, keywords
+              (skip-syntax-forward ".$`")) ; operators, keywords
           (point))))
 
 (defun futhark-indent-backward-token-base ()
@@ -74,7 +74,7 @@ whitespace characters."
   (buffer-substring-no-properties
    (point)
    (progn (or (/= 0 (skip-syntax-backward "w_"))
-              (skip-syntax-backward "."))
+              (skip-syntax-backward ".$`"))
           (point))))
 
 
