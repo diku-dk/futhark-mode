@@ -29,6 +29,10 @@ bells and whistles.  But it does have some commands:
     `futhark repl`, creating a new instance if a current one does not
     exist.
 
+You may also want to use the `futhark fmt` integration with commands
+like `futhark-fmt-format-buffer`, or whenever you save with
+`futhark-fmt-format-on-save-mode`.
+
 ## Eglot
 
 You can start Eglot automatically whenever you edit a Futhark file by
