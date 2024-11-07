@@ -30,8 +30,13 @@ bells and whistles.  But it does have some commands:
     exist.
 
 You may also want to use the `futhark fmt` integration with commands
-like `futhark-fmt-format-buffer`, or whenever you save with
-`futhark-fmt-format-on-save-mode`.
+like `futhark-fmt-buffer`, or whenever you save with
+`futhark-fmt-on-save-mode`. You can enable that automatically on load
+as well:
+
+```elisp
+(add-hook 'futhark-mode-hook futhark-fmt-on-save-mode)
+```
 
 ## Eglot
 
