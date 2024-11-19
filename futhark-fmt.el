@@ -26,7 +26,7 @@
   :safe #'listp)
 
 (defvar futhark-fmt-mode-map (make-sparse-keymap)
-  "Local keymap used for `futhark-fmt-format-on-save-mode`.")
+  "Local keymap used for `futhark-fmt-on-save-mode`.")
 
 ;;;###autoload (autoload 'futhark-fmt-buffer "futhark-fmt" nil t)
 ;;;###autoload (autoload 'futhark-fmt-region "futhark-fmt" nil t)
@@ -38,7 +38,7 @@
   :lighter " Fmt"
   :keymap futhark-fmt-mode-map)
 
-(defalias 'futhark-fmt 'futhark-fmt-format-buffer)
+(defalias 'futhark-fmt 'futhark-fmt-buffer)
 
 (provide 'futhark-fmt)
 
