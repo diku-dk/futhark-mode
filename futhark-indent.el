@@ -186,8 +186,8 @@ Return its point."
   (futhark-indent-first-token futhark-indent-forward-token-base forward-sexp))
 
 (defun futhark-indent-first-backward-token-local (token)
-  "Find the first TOKEN before the current position, or 'local'.
-If the token just prior to the found token is 'local', return the
+  "Find the first TOKEN before the current position, or \"local\".
+If the token just prior to the found token is \"local\", return the
 position of that instead."
   (let ((pos (futhark-indent-first-backward-token token)))
     (when pos
@@ -237,7 +237,7 @@ change in the program).")
                           futhark-indent-level))))))
 
 (defun futhark-indent-find-outer-module ()
-  "Try to find the 'module' or 'open' enclosing the current code block.
+  "Try to find the \"module\" or \"open\" enclosing the current code block.
 Uses the `futhark-indent-state-current-outer-module' state as a
 lookup when indenting a region."
   (if futhark-indent-state-current-outer-module
