@@ -15,7 +15,7 @@
 (require 'comint)
 
 (defcustom futhark-comint-interpreter-name "futhark"
-  "Futhark interpreter to run, not including options."
+  "Futhark executable to run, not including options."
   :type 'string :group 'futhark)
 
 (defcustom futhark-comint-interpreter-args '("repl")
@@ -29,7 +29,11 @@
   "Run an inferior instance of `futhark repl' inside Emacs."
   (interactive)
   (pop-to-buffer
-   (apply 'make-comint "futhark" futhark-comint-interpreter-name nil futhark-comint-interpreter-args))
+   (apply 'make-comint
+          "futhark-repl"
+          futhark-comint-interpreter-name
+          nil
+          futhark-comint-interpreter-args))
   (futhark-comint-mode))
 
 (defvar futhark-comint-mode-map
@@ -60,8 +64,8 @@ found."
    (list (or buffer-file-name
              (read-file-name "File to load: " nil nil t))))
   (comint-check-source file)
-  (let ((b (get-buffer "*futhark*"))
-        (p (get-process "futhark")))
+  (let ((b (get-buffer "*futhark-repl*"))
+        (p (get-process "futhark-repl")))
     (if (and b p)
         (progn
          (with-current-buffer b
