@@ -35,7 +35,7 @@ like `futhark-fmt-buffer`, or whenever you save with
 as well:
 
 ```elisp
-(add-hook 'futhark-mode-hook futhark-fmt-on-save-mode)
+(add-hook 'futhark-mode-hook 'futhark-fmt-on-save-mode)
 ```
 
 ## Eglot
