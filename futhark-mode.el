@@ -84,7 +84,7 @@
   "Major mode for editing Futhark source files."
   :syntax-table futhark-syntax-table
   (setq-local comment-start "--")
-  (setq-local comment-start-skip "--[ \t]*")
+  (setq-local comment-start-skip "--+[ \t]*")
   (setq-local paragraph-start (concat " *-- |\\| ==$\\|[ \t]*$\\|" page-delimiter))
   (setq-local paragraph-separate (concat " *-- ==$\\|[ \t]*$\\|" page-delimiter))
   (setq-local comment-padding " ")
