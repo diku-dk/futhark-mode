@@ -435,14 +435,15 @@ See SMIE documentation for info on KIND and TOKEN."
     (`(:after . ":")                    ; functors
      (smie-rule-parent futhark-indent-level))
 
-    ;; Handle long 'val' declarations by disabling auto-indentation.
+    ;; Handle long 'val' declarations by disabling auto-indentation:
+    ;; `smie-indent-line' hands a non-number back without touching the line.
     (`(:before . "->")
      (when (smie-rule-bolp)
        (let ((valp (futhark-indent-first-backward-token "val")))
          (when (and valp
                     (> valp (or (futhark-indent-first-backward-token "\\") 0))
                     (> valp (or (futhark-indent-first-backward-token "case") 0)))
-           `(column . (current-column))))))
+           '(column . (current-column))))))
 
     (`(:after . "->")
      (cond ((smie-rule-parent-p "\\")   ; lambdas
@@ -489,7 +490,7 @@ See SMIE documentation for info on KIND and TOKEN."
                   (futhark-indent-max (futhark-indent-first-backward-token "match")
                                       (futhark-indent-first-backward-token "case")))))))
 
-(defun futhark-compute-indentation ()
+(defun futhark-indent-compute ()
   "Compute indentation for current line based on ad-hoc rules.
 
 Returns NIL if no indentation can be computed."
@@ -513,7 +514,7 @@ Returns NIL if no indentation can be computed."
            (looking-at "[[:space:]]*}[[:space:]]*$")))
         (save-excursion
           (forward-line -1)
-          (skip-syntax-forward " \t")
+          (skip-chars-forward " \t")
           (current-column)))
 
        ;; Emacs 24 (and the accompanying SMIE) subtly fail at indenting a ']'
@@ -526,11 +527,11 @@ Returns NIL if no indentation can be computed."
        ;; Align to previous line if that is a comment.
        ((save-excursion
           (forward-line -1)
-          (skip-syntax-forward " \t")
+          (skip-chars-forward " \t")
           (looking-at comment-start))
         (save-excursion
           (forward-line -1)
-          (skip-syntax-forward " \t")
+          (skip-chars-forward " \t")
           (current-column)))
 
        ;; Align comment to next non-comment line.
@@ -593,21 +594,24 @@ Returns NIL if no indentation can be computed."
 
 Handles edge cases where SMIE fails.  SMIE will not re-indent
 these indented lines."
-  (let ((indent (futhark-compute-indentation)))
+  (let ((indent (futhark-indent-compute)))
     (when indent
       (progn (indent-line-to indent)
              t))))
 
 (defun futhark-indent-line ()
-  "Indent the current line, keeping point at the same place relative to the text."
-  (let* ((old-indentation (save-excursion (back-to-indentation) (point)))
-         (offset (- (point) old-indentation)))
-    (or (futhark-indent-line-basic)
-        (smie-indent-line))
-    ;; Point is left wherever the indentation function put it; restore it
-    ;; relative to the start of the text, unless it was in the indentation.
-    (let ((text-start (save-excursion (back-to-indentation) (point))))
-      (goto-char (+ text-start (max 0 offset))))))
+  "Indent the current line.
+
+Point keeps its offset from the first non-whitespace character,
+or ends up at that character if it was in the indentation."
+  (let* ((text-start (save-excursion (back-to-indentation) (point)))
+         (offset (- (point) text-start))
+         ;; May be `noindent', which callers of `indent-line-function' check.
+         (result (or (futhark-indent-line-basic)
+                     (smie-indent-line))))
+    (when (> offset 0)
+      (goto-char (+ (save-excursion (back-to-indentation) (point)) offset)))
+    result))
 
 (defun futhark-indent-line-with-state ()
   "Indent the current line, and update the state as well.
@@ -620,13 +624,16 @@ Used only for indenting regions, and only to make it go faster."
 This has the same semantics as running `futhark-indent-line'
 on each line, but contains optimisations to make it run faster."
   (save-excursion
-    (goto-char start)
-    (futhark-indent-state-current-outer-start)
-    (while (and (< (point) end) (not (eobp)))
-      (unless (and (bolp) (eolp))
-        (futhark-indent-line-with-state))
-      (forward-line 1))
-    (futhark-indent-state-current-outer-stop)))
+    (let ((end (copy-marker end)))
+      (goto-char start)
+      (futhark-indent-state-current-outer-start)
+      (unwind-protect
+          (while (and (< (point) end) (not (eobp)))
+            (unless (and (bolp) (eolp))
+              (futhark-indent-line-with-state))
+            (forward-line 1))
+        (futhark-indent-state-current-outer-stop)
+        (set-marker end nil)))))
 
 (defun futhark-indent-setup ()
   "Setup Emacs' Simple Minded Indentation Engine for Futhark."
