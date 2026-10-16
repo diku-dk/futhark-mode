@@ -22,8 +22,10 @@
   "Command line passed to `futhark-comint-interpreter-name', if any."
   :type '(repeat string) :group 'futhark)
 
-(defvar futhark-comint-prompt-regexp "^\\(?:\\[[0-9]+\\]\\)"
-  "Prompt for `run-futhark'.")
+(defvar futhark-comint-prompt-regexp "^\\[[0-9]+\\]> *"
+  "Prompt for `run-futhark'.
+Matches the trailing \"> \" as well, so that `comint-bol' and
+friends do not treat it as part of the input.")
 
 (defun run-futhark ()
   "Run an inferior instance of `futhark repl' inside Emacs."
