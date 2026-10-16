@@ -28,6 +28,7 @@
 (require 'futhark-highlight)
 (require 'futhark-indent)
 (require 'futhark-comint)
+(require 'futhark-test)
 
 (defgroup futhark ()
   "Editing Futhark source files."

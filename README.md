@@ -29,6 +29,13 @@ bells and whistles.  But it does have some commands:
     `futhark repl`, creating a new instance if a current one does not
     exist.
 
+  * `futhark-test` runs `futhark test` on the current file, asking which
+    options to pass (`--backend=c` by default, editable in the
+    minibuffer), and shows the output as it arrives in a
+    `*futhark-test*` buffer.  That buffer is a Compilation mode buffer,
+    so `M-g M-n` steps through any reported errors, and `g` runs the
+    tests again.
+
 You may also want to use the `futhark fmt` integration with commands
 like `futhark-fmt-buffer`, or whenever you save with
 `futhark-fmt-on-save-mode`. You can enable that automatically on load
