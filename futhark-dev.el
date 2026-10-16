@@ -26,15 +26,18 @@ Also reapply futhark-mode to all futhark-mode buffers."
          (cl-remove-if-not (lambda (buf)
                              (with-current-buffer buf
                                (eq major-mode 'futhark-mode)))
-                           (buffer-list))))
+                           (buffer-list)))
+        (fmt-loaded (featurep 'futhark-fmt)))
 
     (ignore-errors (unload-feature 'futhark-mode t))
     (ignore-errors (unload-feature 'futhark-highlight t))
     (ignore-errors (unload-feature 'futhark-indent t))
     (ignore-errors (unload-feature 'futhark-comint t))
-    (ignore-errors (unload-feature 'futhark-flycheck t))
+    (ignore-errors (unload-feature 'futhark-fmt t))
 
     (require 'futhark-mode)
+    (when fmt-loaded
+      (require 'futhark-fmt))
 
     (mapc (lambda (buf)
             (with-current-buffer buf
