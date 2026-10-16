@@ -71,8 +71,10 @@ name)."
   "A regex describing a Futhark variable.")
 
 (defconst futhark-highlight-hole
-  (concat "\\(?:" "\\S." "\\?\\?\\?" "\\S." "\\)")
-  "A regex describing a Futhark typed holed.")
+  "\\?\\?\\?"
+  "A regex describing a Futhark typed hole.
+A longer run of question marks is a syntax error, so there is no
+need to guard against one.")
 
 (defconst futhark-highlight-constructor
   (concat "\\(?:" "#[_'[:alnum:]]+" "\\)")
