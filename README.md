@@ -25,7 +25,7 @@ https://melpa.org/ archive, and install the `futhark-mode` package.
 This mode is pretty straightforward and does not provide a lot of
 bells and whistles.  But it does have some commands:
 
-  * **C-c C-l** (`futhark-load-file`) loads the current file into
+  * **C-c C-l** (`futhark-comint-load-file`) loads the current file into
     `futhark repl`, creating a new instance if a current one does not
     exist.
 

@@ -34,7 +34,8 @@
           futhark-comint-interpreter-name
           nil
           futhark-comint-interpreter-args))
-  (futhark-comint-mode))
+  (unless (derived-mode-p 'futhark-comint-mode)
+    (futhark-comint-mode)))
 
 (defvar futhark-comint-mode-map
   (let ((map (make-sparse-keymap)))
@@ -46,12 +47,11 @@
   "Major mode for `run-futhark'.
 
 \\<futhark-comint-mode-map>"
-  nil "futhark"
   (setq comint-prompt-regexp futhark-comint-prompt-regexp)
   ;; this makes it read only; a contentious subject as some prefer the
   ;; buffer to be overwritable.
   (setq comint-prompt-read-only t)
-  (set (make-local-variable 'paragraph-start) futhark-comint-prompt-regexp))
+  (setq-local paragraph-start futhark-comint-prompt-regexp))
 
 (defun futhark-comint-load-file (file)
   "Load FILE into the \"futhark repl\" process.
@@ -64,15 +64,15 @@ found."
    (list (or buffer-file-name
              (read-file-name "File to load: " nil nil t))))
   (comint-check-source file)
-  (let ((b (get-buffer "*futhark-repl*"))
-        (p (get-process "futhark-repl")))
-    (if (and b p)
-        (progn
-         (with-current-buffer b
-           (apply comint-input-sender (list p (concat ":load " file))))
-         (pop-to-buffer b))
-      (run-futhark)
-      (futhark-comint-load-file file))))
+  (let ((p (get-process "futhark-repl")))
+    (unless (and p (process-live-p p))
+      (save-window-excursion (run-futhark))
+      (setq p (get-process "futhark-repl")))
+    (unless p
+      (user-error "Could not start futhark repl"))
+    (with-current-buffer (process-buffer p)
+      (funcall comint-input-sender p (concat ":load " file)))
+    (pop-to-buffer (process-buffer p))))
 
 (provide 'futhark-comint)
 
