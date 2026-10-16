@@ -56,7 +56,7 @@ name)."
                   "\\|"
                   "[0-9_]+"
                   "\\(?:\\.[0-9_]+\\)?"
-                  "\\(?:e-?[0-9_]+\\)?"
+                  "\\(?:[eE][+-]?[0-9_]+\\)?"
                   "\\)"
                   )
           "\\(?:i8\\|i16\\|i32\\|i64\\|u8\\|u16\\|u32\\|u64\\|f16\\|f32\\|f64\\)?"
@@ -64,7 +64,10 @@ name)."
   "All numeric constants, including hex float literals.")
 
 (defconst futhark-highlight-character
-  (concat "'\\\\?[^']?'"))
+  ;; The leading '\_<' keeps us from mistaking the tail of an identifier
+  ;; such as x'y' for a character literal, as "'" is a symbol constituent.
+  (concat "\\_<'\\\\?[^']?'")
+  "A regex describing a Futhark character literal.")
 
 (defconst futhark-highlight-var
   (concat "\\(?:" "[_[:alpha:]][_'[:alnum:]]*" "\\)")
@@ -83,14 +86,14 @@ need to guard against one.")
 (defconst futhark-highlight-operator
   (concat "\\(?:"
           (concat "["
-                  "-+*/%!<>=&|@"
+                  "-+*/%!<>=&|@^"
                   "]"
                   "["
-                  "-+*/%!<>=&|@"
+                  "-+*/%!<>=&|@^"
                   "]" "+") ; don't highlight '=', but do highlight '=='
           "\\|"
           (concat "["
-                  "-+*/%!<>&|@"
+                  "-+*/%!<>&|@^"
                   "]")
           "\\|"
           "`[^`]*`"
@@ -145,29 +148,34 @@ need to guard against one.")
     ;; Variable and tuple declarations.
 
       ;;; Value specs.
-    (,(concat "val" futhark-highlight-ws1
+    (,(concat "\\_<val" futhark-highlight-ws1
               "\\(" futhark-highlight-var "\\)")
      . '(1 font-lock-function-name-face))
 
     ;;; Definitions.
-    (,(concat "def" futhark-highlight-ws1
+    (,(concat "\\_<def" futhark-highlight-ws1
+              "\\(" futhark-highlight-var "\\)")
+     . '(1 font-lock-function-name-face))
+
+      ;;; Entry points.
+    (,(concat "\\_<entry" futhark-highlight-ws1
               "\\(" futhark-highlight-var "\\)")
      . '(1 font-lock-function-name-face))
 
       ;;; Lets.
       ;;;; Primitive values.
-    (,(concat "let" futhark-highlight-ws1
+    (,(concat "\\_<let" futhark-highlight-ws1
               "\\(" futhark-highlight-var "\\)"
               futhark-highlight-ws "=")
      . '(1 font-lock-variable-name-face))
       ;;;; In-place updates.
-    (,(concat "let" futhark-highlight-ws1
+    (,(concat "\\_<let" futhark-highlight-ws1
               "\\(" futhark-highlight-var "\\)"
               "\\[")
      . '(1 font-lock-variable-name-face))
       ;;;; Tuples.  XXX: It would be nice to highlight only the variable names
       ;;;; inside the parantheses, and not also the commas.
-    (,(concat "let" futhark-highlight-ws1 "("
+    (,(concat "\\_<let" futhark-highlight-ws1 "("
               "\\(" "[^)]+" "\\)")
      . '(1 font-lock-variable-name-face))
       ;;; Function parameters.
@@ -198,7 +206,9 @@ need to guard against one.")
     ;; Keywords.
     ;; Placed after constants, so e.g. '#open' is highlighted
     ;; as a value and not as a keyword.
-    (, (concat "\\(" (futhark-highlight-syms-re futhark-highlight-keywords)
+    (, (concat "\\("
+               "\\_<type[~^]" ; size-lifted and lifted type abbreviations
+               "\\|" (futhark-highlight-syms-re futhark-highlight-keywords)
                "\\|" "\\\\" ; lambda
                "\\)")
      . font-lock-keyword-face)
@@ -210,19 +220,19 @@ need to guard against one.")
     ;; Types.
     ;;; Type aliases.  XXX: It would be nice to highlight also the right hand
     ;;; side.
-    (,(concat "type[~^]?" futhark-highlight-ws1 "\\(" futhark-highlight-type "\\)")
+    (,(concat "\\_<type[~^]?" futhark-highlight-ws1 "\\(" futhark-highlight-type "\\)")
      . '(1 font-lock-type-face))
       ;;; Builtin types.
     (,(futhark-highlight-syms-re futhark-highlight-builtin-types)
      . font-lock-type-face)
 
     ;; Modules
-    (,(concat "module" futhark-highlight-ws1 "\\(" futhark-highlight-var "\\)")
+    (,(concat "\\_<module" futhark-highlight-ws1 "\\(" futhark-highlight-var "\\)")
      . '(1 font-lock-type-face))
 
     ;; Functions.
       ;;; Function definitions.
-    (,(concat "\\(?:"
+    (,(concat "\\_<\\(?:"
               "let"
               "\\|"
               "entry"
