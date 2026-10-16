@@ -602,10 +602,15 @@ these indented lines."
              t))))
 
 (defun futhark-indent-line ()
-  "Indent the current line."
-  (let ((start (point)))
-    (or (futhark-indent-try futhark-indent-line-basic)
-        (smie-indent-line))))
+  "Indent the current line, keeping point at the same place relative to the text."
+  (let* ((old-indentation (save-excursion (back-to-indentation) (point)))
+         (offset (- (point) old-indentation)))
+    (or (futhark-indent-line-basic)
+        (smie-indent-line))
+    ;; Point is left wherever the indentation function put it; restore it
+    ;; relative to the start of the text, unless it was in the indentation.
+    (let ((text-start (save-excursion (back-to-indentation) (point))))
+      (goto-char (+ text-start (max 0 offset))))))
 
 (defun futhark-indent-line-with-state ()
   "Indent the current line, and update the state as well.
