@@ -1,4 +1,4 @@
-;;; futhark-fmt.el --- Format SML source code using the "futhark fmt" program -*- lexical-binding: t -*-
+;;; futhark-fmt.el --- Format Futhark source code using the "futhark fmt" program -*- lexical-binding: t -*-
 
 ;; Copyright (C) DIKU 2013-2019, University of Copenhagen
 
@@ -17,7 +17,7 @@
 (defgroup futhark-fmt nil
   "Integration with the \"futhark fmt\" formatting program."
   :prefix "futhark-fmt-"
-  :group 'sml)
+  :group 'futhark)
 
 (defcustom futhark-fmt-extra-args '()
   "Extra arguments to give to \"futhark fmt\"."
