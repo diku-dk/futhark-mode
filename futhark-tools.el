@@ -1,4 +1,4 @@
-;;; futhark-test.el --- run "futhark test" from futhark-mode  -*- lexical-binding: t; -*-
+;;; futhark-tools.el --- run "futhark test" from futhark-mode  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) DIKU 2013-2019, University of Copenhagen
 
@@ -93,6 +93,6 @@ save modified buffers first, as \\[compile] does."
                        #'futhark-test-mode
                        (lambda (_name-of-mode) futhark-test-buffer-name))))
 
-(provide 'futhark-test)
+(provide 'futhark-tools)
 
-;;; futhark-test.el ends here
+;;; futhark-tools.el ends here

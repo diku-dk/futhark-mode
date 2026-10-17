@@ -33,7 +33,7 @@ Also reapply futhark-mode to all futhark-mode buffers."
     (ignore-errors (unload-feature 'futhark-highlight t))
     (ignore-errors (unload-feature 'futhark-indent t))
     (ignore-errors (unload-feature 'futhark-comint t))
-    (ignore-errors (unload-feature 'futhark-test t))
+    (ignore-errors (unload-feature 'futhark-tools t))
     (ignore-errors (unload-feature 'futhark-fmt t))
 
     (require 'futhark-mode)
